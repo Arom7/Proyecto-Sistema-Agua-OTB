@@ -35,4 +35,16 @@ class Propiedad extends Model
     public function medidores() {
         return $this->hasMany(Medidor::class,'propiedad_id_medidor','id');
     }
+
+    //implentacion por cuadra, casa de cuadra a digamos
+    public static function buscar_id_propiedad($id_socio, $cuadra){
+        return static::where('socio_id', $id_socio)
+                      ->where('id', 'like' ,$cuadra.'%')
+                      ->get();
+    }
+
+    public static function buscar_id_propiedad_unica($id_socio){
+        return static::where('socio_id', $id_socio)
+                      ->get();
+    }
 }

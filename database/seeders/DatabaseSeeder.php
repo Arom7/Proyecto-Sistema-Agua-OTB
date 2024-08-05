@@ -24,9 +24,7 @@ class DatabaseSeeder extends Seeder
             SocioSeeder::class,
             TelefonoSeeder::class,
             UsuarioSeeder::class,
-            RolSeeder::class,
             // Tabla intermedia Rol >--< Usuario
-            UsuarioRolSeeder::class,
             PropiedadSeeder::class,
             MultaSeeder::class,
             //tabla intermedia Propiedad >--< Multa
