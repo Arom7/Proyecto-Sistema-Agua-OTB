@@ -29,4 +29,16 @@ class Medidor extends Model
         return $this->hasMany(Consumo::class, 'propiedad_id_consumo' ,'propiedad_id_medidor');
     }
 
+    //Mutador para actualizar medida
+
+    public function actualizarUltimaMedida($medida ,$id_propiedad){
+        Medidor::where('propiedad_id_medidor', $id_propiedad)->update([
+                'ultima_medida' => $medida
+        ]);
+    }
+
+    public static function busquedaMedidor($propiedad_id){
+        return static ::where('propiedad_id_medidor' , $propiedad_id)
+                      ->first();
+    }
 }

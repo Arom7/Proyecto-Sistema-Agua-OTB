@@ -10,14 +10,12 @@ class Consumo extends Model
     use HasFactory;
 
     protected $table = 'consumos';
-    protected $primaryKey = 'propiedad_id_consumo';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
         'lectura_actual',
-        'mes_correspondiente'
-    ];
-
-    protected $guarded = [
+        'mes_correspondiente',
+        'propiedad_id_consumo',
         'consumo_total'
     ];
 

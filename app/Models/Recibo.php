@@ -16,10 +16,7 @@ class Recibo extends Model
     protected $fillable = [
         'total',
         'fecha_lectura',
-        'observaciones'
-    ];
-
-    protected $guarded = [
+        'observaciones',
         'estado_pago',
         'id_consumo_recibo'
     ];

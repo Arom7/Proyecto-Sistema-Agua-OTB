@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Propiedad;
 use App\Models\Recibo;
 use App\Models\Socio;
+use App\Models\Medidor;
+use App\Models\Consumo;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
@@ -59,8 +62,6 @@ class reciboController extends Controller
         // formulario validacion
 
         $validacionRecibo =  Validator::make($request->all(),[
-            'total' => ['required', 'regex:/^\d+(\.\d{1,2})?$/'],
-            'fecha_lectura' => ['required' , 'date'],
             'observaciones' => ['regex:/^[a-zA-Z0-9]+$/']
         ],[
             'total.regex'=> 'El total debe ser un numero decimal',
@@ -78,12 +79,64 @@ class reciboController extends Controller
         }else{
             $id_socio = Socio::buscar_id_usuario($request->nombre,$request->primerApellido,$request->segundoApellido);
 
-            $propiedad = Propiedad::buscar_id_propiedad($id_socio, $request->cuadra);
+            if(!$id_socio){
+                return response()->json([
+                    'message' => 'Socio no encontrado',
+                    'status' => 404,
+                    'socio' => $id_socio
+                ],404);
+            }
+
+            $propiedad = Propiedad::buscar_id_propiedad($id_socio->id, $request->cuadra);
+
+            if(!$propiedad){
+                return response()->json([
+                    'message' => 'Propiedad no encontrado',
+                    'status' => 404,
+                    'propiedad' => $propiedad
+                ],404);
+            }
+
+            $medidor = Medidor::busquedaMedidor($propiedad->id);
+
+            if(!$medidor){
+                return response()->json([
+                    'message' => 'Medidor no encontrado',
+                    'status' => 404
+                ],404);
+            }
+
+            $ultima_medida = $medidor->ultima_medida;
+
+            $medidor->ultima_medida = $request->lectura_actual;
+            $medidor->save();
+
+            $consumo_total = $request->lectura_actual - $ultima_medida;
+
+            $consumo = Consumo::create([
+                'mes_correspondiente' => $request->mes_correspondiente,
+                'lectura_actual' => $request->lectura_actual,
+                'consumo_total'=> $consumo_total,
+                'propiedad_id_consumo' => $propiedad->id
+            ]);
+
+            $consumo->save();
+
+            $recibo = Recibo::create([
+                'estado_pago' => false,
+                'total' => $consumo_total * 1.5,
+                'fecha_lectura' => Carbon::now(),
+                'id_consumo_recibo' => $consumo->id,
+                'observaciones' => $request->observaciones
+            ]);
+
+            $recibo->save();
 
             $data = [
                 'message' => 'Socio encontrado',
                 'status' => 200,
-                'propiedades' => $propiedad,
+                'recibo' => $recibo,
+                'consumo' => $consumo,
             ];
             return response()->json($data,200);
         }

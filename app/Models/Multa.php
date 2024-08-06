@@ -25,4 +25,6 @@ class Multa extends Model
                     ->withTimestamps();
     }
 
+
+    //Mutadores y accesores
 }

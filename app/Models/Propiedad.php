@@ -40,7 +40,7 @@ class Propiedad extends Model
     public static function buscar_id_propiedad($id_socio, $cuadra){
         return static::where('socio_id', $id_socio)
                       ->where('id', 'like' ,$cuadra.'%')
-                      ->get();
+                      ->first();
     }
 
     public static function buscar_id_propiedad_unica($id_socio){
