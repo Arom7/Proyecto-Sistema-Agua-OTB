@@ -124,7 +124,7 @@ class reciboController extends Controller
 
             $recibo = Recibo::create([
                 'estado_pago' => false,
-                'total' => $consumo_total * 1.5,
+                'total' => Recibo::calcularTotal($consumo_total),
                 'fecha_lectura' => Carbon::now(),
                 'id_consumo_recibo' => $consumo->id,
                 'observaciones' => $request->observaciones
