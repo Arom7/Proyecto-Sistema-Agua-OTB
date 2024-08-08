@@ -7,8 +7,9 @@ use App\Models\Usuario;
 use Illuminate\Http\Request;
 use App\Models\Socio;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Persona;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class socioController extends Controller
 {
@@ -41,37 +42,9 @@ class socioController extends Controller
     public function store (Request $request)
     {
         try {
-            $validacion = Validator::make($request->all(),[
-                // Validaciones a datos a socios
-                'nombre' => ['required', 'string', 'regex:/^(?!\s)(?!.*\s$)[a-zA-Z\s]*[a-zA-Z]+[a-zA-Z\s]*$/', 'max:85'],
-                'primer_apellido' => ['required', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
-                'segundo_apellido' => ['nullable', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
-                'ci' => ['required', 'string', 'regex:/^[a-zA-Z0-9]+$/', 'max:40'],
-                // Validaciones a datos de usuario
-                'username' => ['required', 'string' , 'regex:/^[a-zA-Z0-9]+$/', 'min: 6', 'max:15'],
-                'email' => ['required', 'email', 'unique:usuarios,email'],
-                'contrasenia' => ['required', 'string' , 'regex:/^[\w\s!@#$%^&*()_+\-=\[\]{};:"\\|,.<>\/?~`]+$/' , 'min:8']
-            ], [
-                'nombre.regex' => 'Tu nombre solo puede contener letras y espacios.',
-                'primer_apellido.regex' => 'Tu primer apellido solo puede contener letras.',
-                'segundo_apellido.regex' => 'Tu segundo apellido solo puede contener letras',
-                'ci.regex' => 'El CI solo puede contener letras y números.',
-                'username.regex' => 'Su username debe contener solo letras mayusculas o minusculas ademas de numeros.',
-                'email.email' => 'El campo debe ser una direccion electronica valida',
-                'email.unique' => 'El correo ya se encuentra registrado.',
-                'contrasenia.regex' => ' Combinar entre mayusculas, minusculas
-                numeros y caracteres especiales.',
-                'contrasenia.min' => 'La contrasenia debe contener al menos 8 caracteres.'
-            ]);
 
-            if ($validacion -> fails()){
-                $data = [
-                    'message' => 'Error, al validar datos',
-                    'status' => 400,
-                    'errores' => $validacion -> errors()
-                ];
-                return response()->json($data,200);
-            }
+            Socio::validar($request->all());
+            Usuario::validar($request->all());
 
             $esta_registrado = Socio::usuarioExistente($request->nombre,$request->primer_apellido,$request->segundo_apellido);
 
@@ -90,15 +63,19 @@ class socioController extends Controller
             if(!$esta_registrada_cuenta){
 
                 $id_usuario = Socio::buscar_id_usuario($request->nombre,$request->primer_apellido,$request->segundo_apellido);
-                $contrasenia_encriptada = Hash::make($request->contrasenia);
+
+                if(!$id_usuario){
+                    throw new ModelNotFoundException('Propiedad no encontrada');
+                }
 
                 $cuenta = Usuario::create([
                     'username' => $request->username,
-                    'contrasenia' => $contrasenia_encriptada,
+                    'contrasenia' => Hash::make($request->contrasenia),
                     'email' => $request->email,
+                    'socio_id_usuario' => $id_usuario->id,
                 ]);
 
-                $cuenta->socio_id_usuario = $id_usuario;
+                //$cuenta->socio_id_usuario = $id_usuario;
                 $cuenta->save();
 
                 $data = [
@@ -115,7 +92,18 @@ class socioController extends Controller
                 return response()->json($data, 200);
             }
 
-        } catch(\Illuminate\Database\QueryException $e){
+        }catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 404,
+            ], 404);
+        }catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Datos invalidados.',
+                'errores' => $e->getMessage(),
+                'status' => 422,
+            ], 422);
+        }catch(\Illuminate\Database\QueryException $e){
             return response()->json([
                 'message' => 'Error en la consulta de la base de datos: ' . $e->getMessage(),
                 'status' => 500,

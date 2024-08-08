@@ -5,6 +5,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class Socio extends Model
 {
@@ -58,5 +60,53 @@ class Socio extends Model
                      ->where('segundo_apellido_socio', $segundoApellido)
                      ->select('id')
                      ->first();
+    }
+
+    //Validacion de datos socios registro
+    public static function validar($data){
+        $reglas = [
+            'nombre' => ['required', 'string', 'regex:/^(?! )[a-zA-Z]+( [a-zA-Z]+)*$/', 'max:85'],
+            'primer_apellido' => ['required', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
+            'segundo_apellido' => ['nullable', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
+            'ci' => ['required', 'string', 'regex:/^[a-zA-Z0-9]+$/', 'max:40'],
+        ];
+
+        $messages = [
+            'nombre.regex' => 'Tu nombre solo puede contener letras y espacios.',
+            'primer_apellido.regex' => 'Tu primer apellido solo puede contener letras.',
+            'segundo_apellido.regex' => 'Tu segundo apellido solo puede contener letras',
+            'ci.regex' => 'El CI solo puede contener letras y números.',
+        ];
+
+        $validacion = Validator::make($data,$reglas,$messages);
+
+        if($validacion->failed()){
+            throw new ValidationException($validacion);
+        }
+
+        return true;
+    }
+
+    //Validacion de datos socios recibo
+    public static function validar_socio_recibo($data){
+        $reglas = [
+            'nombre' => ['required', 'string', 'regex:/^(?!\s)(?!.*\s$)[a-zA-Z\s]*[a-zA-Z]+[a-zA-Z\s]*$/', 'max:85'],
+            'primerApellido' => ['required', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
+            'segundoApellido' => ['nullable', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
+        ];
+
+        $messages = [
+            'nombre.regex' => 'Tu nombre solo puede contener letras y espacios.',
+            'primerApellido.regex' => 'Tu primer apellido solo puede contener letras.',
+            'segundoApellido.regex' => 'Tu segundo apellido solo puede contener letras',
+        ];
+
+        $validacion = Validator::make($data,$reglas,$messages);
+
+        if($validacion->fails()){
+            throw new ValidationException($validacion);
+        }
+
+        return true;
     }
 }

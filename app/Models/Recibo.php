@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class Recibo extends Model
 {
@@ -24,6 +26,26 @@ class Recibo extends Model
     // Relacion recibo -- consumo (Relacion uno a uno)
     public function consumo(){
         return $this->belongsTo(Consumo::class , 'id_consumo_recibo' , 'id_consumo');
+    }
+
+
+    //Validacion Recibo
+    public static function validar($data){
+
+        $reglas = [
+            'observaciones' => 'regex:/^[a-zA-Z0-9]+$/',
+        ];
+
+        $message = [
+            'observaciones.regex' => 'Solo puedes ingresar letras y numeros.'
+        ];
+
+        $validacion =  Validator::make($data,$reglas,$message);
+
+        if($validacion->fails()){
+            throw new ValidationException($validacion);
+        }
+        return true;
     }
 
     public static function calcularTotal($consumo){

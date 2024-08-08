@@ -9,6 +9,8 @@ use App\Models\Socio;
 use App\Models\Medidor;
 use App\Models\Consumo;
 use Carbon\Carbon;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
@@ -19,15 +21,15 @@ class reciboController extends Controller
      */
     public function index()
     {
-        try{
+        try {
             $recibos = Recibo::all();
-            if ($recibos->isEmpty()){
+            if ($recibos->isEmpty()) {
                 $data = [
                     'message' => 'No se encontraron recibos',
                     'status' => 400
                 ];
-                return response()->json($data,404);
-            }else{
+                return response()->json($data, 404);
+            } else {
                 $data = [
                     'message' => 'Solicitud aceptada .Recibos encontrados',
                     'status' => 200,
@@ -35,9 +37,9 @@ class reciboController extends Controller
                 ];
                 return response()->json($data, 200);
             }
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             $data = [
-                'message' => 'Error al obtener los recibos: '.$e->getMessage(),
+                'message' => 'Error al obtener los recibos: ' . $e->getMessage(),
                 'status' => 500
             ];
             return response()->json($data, 500);
@@ -52,58 +54,28 @@ class reciboController extends Controller
         /**
          * Se realiza el llamado a la funcion de busqueda
          */
+        try {
+            // Formulario validacion Consumo / Recibo / Socio
+            Socio::validar_socio_recibo($request->all());
+            Consumo::validar($request->all());
+            Recibo::validar($request->all());
 
-        $validacionConsumo = Validator::make($request->all(), [
-            'mes_correspondiente' => ['required', 'date'],
-            'lectura_actual'=> ['required', 'integer']
-        ],[
-            'lectura_actual.integer' => 'El campo debe ser un numero entero'
-        ]);
-        // formulario validacion
+            $id_socio = Socio::buscar_id_usuario($request->nombre, $request->primerApellido, $request->segundoApellido);
 
-        $validacionRecibo =  Validator::make($request->all(),[
-            'observaciones' => ['regex:/^[a-zA-Z0-9]+$/']
-        ],[
-            'total.regex'=> 'El total debe ser un numero decimal',
-            'observaciones.regex' => 'Solo puedes ingresar letras y numeros.'
-        ]);
-
-        if($validacionConsumo->fails() || $validacionRecibo->fails()){
-            $data = [
-                'message' => 'Error en la validacion de datos',
-                'status' => 400,
-                'errorConsumo' => $validacionConsumo -> errors(),
-                'errorRecibo' => $validacionRecibo->errors(),
-            ];
-            return response()->json($data,400);
-        }else{
-            $id_socio = Socio::buscar_id_usuario($request->nombre,$request->primerApellido,$request->segundoApellido);
-
-            if(!$id_socio){
-                return response()->json([
-                    'message' => 'Socio no encontrado',
-                    'status' => 404,
-                    'socio' => $id_socio
-                ],404);
+            if (!$id_socio) {
+                throw new ModelNotFoundException('Socio no encontrado');
             }
 
             $propiedad = Propiedad::buscar_id_propiedad($id_socio->id, $request->cuadra);
 
-            if(!$propiedad){
-                return response()->json([
-                    'message' => 'Propiedad no encontrado',
-                    'status' => 404,
-                    'propiedad' => $propiedad
-                ],404);
+            if (!$propiedad) {
+                throw new ModelNotFoundException('Propiedad no encontrada');
             }
 
             $medidor = Medidor::busquedaMedidor($propiedad->id);
 
-            if(!$medidor){
-                return response()->json([
-                    'message' => 'Medidor no encontrado',
-                    'status' => 404
-                ],404);
+            if (!$medidor) {
+                throw new ModelNotFoundException('Medidor no encontrado');
             }
 
             $ultima_medida = $medidor->ultima_medida;
@@ -116,7 +88,7 @@ class reciboController extends Controller
             $consumo = Consumo::create([
                 'mes_correspondiente' => $request->mes_correspondiente,
                 'lectura_actual' => $request->lectura_actual,
-                'consumo_total'=> $consumo_total,
+                'consumo_total' => $consumo_total,
                 'propiedad_id_consumo' => $propiedad->id
             ]);
 
@@ -138,9 +110,26 @@ class reciboController extends Controller
                 'recibo' => $recibo,
                 'consumo' => $consumo,
             ];
-            return response()->json($data,200);
+            return response()->json($data, 200);
+            //Proceso realizado con exito
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Datos invalidados.',
+                'errores' => $e->getMessage(),
+                'status' => 422,
+            ], 422);
+        }catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 404,
+            ], 404);
+        }catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor.',
+                'error' => $e->getMessage(),
+                'status' => 500
+            ], 500);
         }
-
     }
 
     /**
