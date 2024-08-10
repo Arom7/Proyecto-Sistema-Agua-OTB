@@ -78,6 +78,7 @@ class Socio extends Model
             'ci.regex' => 'El CI solo puede contener letras y números.',
         ];
 
+
         $validacion = Validator::make($data,$reglas,$messages);
 
         if($validacion->failed()){
@@ -102,11 +103,9 @@ class Socio extends Model
         ];
 
         $validacion = Validator::make($data,$reglas,$messages);
-
         if($validacion->fails()){
             throw new ValidationException($validacion);
         }
-
         return true;
     }
 }

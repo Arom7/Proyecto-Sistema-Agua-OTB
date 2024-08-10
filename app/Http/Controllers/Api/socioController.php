@@ -117,6 +117,7 @@ class socioController extends Controller
     }
 
     public function show($id){
+
         $usuario = Socio::find($id);
 
         if(!$usuario){
@@ -158,45 +159,49 @@ class socioController extends Controller
 
     public function update (Request $request,$id){
 
-        $usuario = Socio::find($id);
+        try{
+            $socio = Socio::find($id);
 
-        if(!$usuario){
+            if(!$socio){
+                throw new ModelNotFoundException('Socio no encontrado');
+            }
+
+            Socio::validar($request->all());
+
+            $validacion = Validator::make($request->all(),[
+                'nombre' => 'required', 'string', 'regex:/^(?!\s)(?!.*\s$)[a-zA-Z\s]*[a-zA-Z]+[a-zA-Z\s]*$/','max:45',
+                'primerApellido' => 'required', 'string' , 'regex:/^[a-zA-Z]+$/' ,'max:45',
+                'segundoApellido' => 'nullable','string', 'regex:/^[a-zA-Z]+$/','max:45'
+            ]);
+
+            if ($validacion -> fails()){
+                $data = [
+                    'message' => 'Error en la validacion de datos',
+                    'status' => 400,
+                    'errores' => $validacion -> errors()
+                ];
+                return response()->json($data,400);
+            }
+
+            $socio->nombre = $request->nombre;
+            $socio->primerApellido = $request->primerApellido;
+            $socio->segundoApellido = $request->segundoApellido;
+
+            $socio->save();
+
             $data = [
-                'message' => 'Usuario no encontrado',
-                'status' => 404
+                'message' => 'Datos actualizados',
+                'usuario' => $socio,
+                'status' => 200
             ];
-            return response()->json($data,404);
+            return response()->json($data,200);
+
+        }catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 404,
+            ], 404);
         }
-
-        $validacion = Validator::make($request->all(),[
-            'nombre' => 'required', 'string', 'regex:/^(?!\s)(?!.*\s$)[a-zA-Z\s]*[a-zA-Z]+[a-zA-Z\s]*$/','max:45',
-            'primerApellido' => 'required', 'string' , 'regex:/^[a-zA-Z]+$/' ,'max:45',
-            'segundoApellido' => 'nullable','string', 'regex:/^[a-zA-Z]+$/','max:45'
-        ]);
-
-        if ($validacion -> fails()){
-            $data = [
-                'message' => 'Error en la validacion de datos',
-                'status' => 400,
-                'errores' => $validacion -> errors()
-            ];
-            return response()->json($data,400);
-        }
-
-        $usuario->nombre = $request->nombre;
-        $usuario->primerApellido = $request->primerApellido;
-        $usuario->segundoApellido = $request->segundoApellido;
-
-        $usuario->save();
-
-        $data = [
-            'message' => 'Datos actualizados',
-            'usuario' => $usuario,
-            'status' => 200
-        ];
-
-        return response()->json($data,200);
-
     }
 
     public function update_parcial(Request $request, $id){
