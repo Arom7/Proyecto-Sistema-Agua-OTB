@@ -31,13 +31,13 @@ Route::get('/socios/{id}',[socioController::class,'show']);
 
 // Modifican un recurso, el impacto es sobre la totalidad
 // de los atributos de recurso
-Route::put('actualizar/socio/{id}',[socioController::class, 'update']);
+Route::put('/actualizar/socio/{id}',[socioController::class, 'update']);
 
 // Modifican sobre uno o varios de los atributos
-Route::patch('actualizar/socio/{id}',[socioController::class, 'update_parcial']);
+Route::patch('/actualizar/socio/{id}',[socioController::class, 'update_parcial']);
 
 // Eliminar al usuario
-Route::delete('socios/{id}', [socioController::class, 'destroy']);
+Route::delete('/socios/{id}', [socioController::class, 'destroy']);
 
 
 /*

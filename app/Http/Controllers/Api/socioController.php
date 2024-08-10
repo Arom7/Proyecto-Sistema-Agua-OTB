@@ -17,18 +17,17 @@ class socioController extends Controller
         try{
             $socios = Socio::all();
             if($socios->isEmpty()){
-                $data = [
-                    'message' => 'No se encontraron usuarios',
+
+                return response()->json([
+                    'message' => 'Lista vacia, usuarios no encontrados',
                     'status' => 400,
-                ];
-                return response()->json($data , 404);
+                ],404);
             }else{
-                $data = [
+                return response()->json([
                     'message' => 'Usuarios encontrados',
                     'status' => 200,
-                    'usuarios' => $socios
-                ];
-                return response()->json($data,200);
+                    'lista_socios' => $socios
+                ],200);
             }
         }catch (\Exception $e){
             $data = [
@@ -118,43 +117,45 @@ class socioController extends Controller
 
     public function show($id){
 
-        $usuario = Socio::find($id);
+        try{
+            $usuario = Socio::find($id);
 
-        if(!$usuario){
-            $data = [
-                'message' => 'Usuario no encontrado',
-                'status' => 404
-            ];
-            return response()->json($data,404);
+            if(!$usuario){
+                throw new ModelNotFoundException('Socio no encontrado');
+            }
+
+            return response()->json([
+                'usuario' => $usuario,
+                'status' => 200
+            ],200);
+        }catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 404,
+            ], 404);
         }
-
-        $data = [
-            'usuario' => $usuario,
-            'status' => 200
-        ];
-
-        return response()->json($data,200);
     }
 
     public function destroy($id){
-        $usuario = Socio::find($id);
+        try{
+            $usuario = Socio::find($id);
 
-        if(!$usuario){
-            $data = [
-                'message' => 'Usuario no encontrado',
-                'status' => 404
-            ];
-            return response()->json($data,404);
+            if(!$usuario){
+                throw new ModelNotFoundException('Socio no encontrado');
+            }
+
+            $usuario -> delete();
+
+            return response()->json([
+                'message' => 'Usuario eliminado',
+                'status' => 200
+            ],200);
+        }catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 404,
+            ], 404);
         }
-
-        $usuario -> delete();
-
-        $data = [
-            'message' => 'Usuario eliminado',
-            'status' => 200
-        ];
-
-        return response()->json($data,200);
     }
 
     public function update (Request $request,$id){
@@ -166,91 +167,73 @@ class socioController extends Controller
                 throw new ModelNotFoundException('Socio no encontrado');
             }
 
-            Socio::validar($request->all());
+            Socio::validar_socio_recibo($request->all());
 
-            $validacion = Validator::make($request->all(),[
-                'nombre' => 'required', 'string', 'regex:/^(?!\s)(?!.*\s$)[a-zA-Z\s]*[a-zA-Z]+[a-zA-Z\s]*$/','max:45',
-                'primerApellido' => 'required', 'string' , 'regex:/^[a-zA-Z]+$/' ,'max:45',
-                'segundoApellido' => 'nullable','string', 'regex:/^[a-zA-Z]+$/','max:45'
-            ]);
-
-            if ($validacion -> fails()){
-                $data = [
-                    'message' => 'Error en la validacion de datos',
-                    'status' => 400,
-                    'errores' => $validacion -> errors()
-                ];
-                return response()->json($data,400);
-            }
-
-            $socio->nombre = $request->nombre;
-            $socio->primerApellido = $request->primerApellido;
-            $socio->segundoApellido = $request->segundoApellido;
+            $socio->nombre_socio = $request->nombre;
+            $socio->primer_apellido_socio = $request->primerApellido;
+            $socio->segundo_apellido_socio = $request->segundoApellido;
 
             $socio->save();
 
-            $data = [
+            return response()->json([
                 'message' => 'Datos actualizados',
                 'usuario' => $socio,
                 'status' => 200
-            ];
-            return response()->json($data,200);
+            ],200);
 
         }catch (ModelNotFoundException $e) {
             return response()->json([
                 'message' => $e->getMessage(),
                 'status' => 404,
             ], 404);
+        }catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Datos invalidados.',
+                'errores' => $e->getMessage(),
+                'status' => 422,
+            ], 422);
         }
     }
 
     public function update_parcial(Request $request, $id){
 
-        $usuario = Socio::find($id);
+        try{
+            $usuario = Socio::find($id);
 
-        if(!$usuario){
-            $data = [
-                'message' => 'Usuario no encontrado',
-                'status' => 404
-            ];
-            return response()->json($data,404);
+            if(!$usuario){
+                throw new ModelNotFoundException('Usuario no encontrado');
+            }
+
+            Socio::validar_socio($request->all());
+
+            if($request->has('nombre')){
+                $usuario->nombre = $request->nombre;
+            }
+            if($request->has('primerApellido')){
+                $usuario->primerApellido = $request->primerApellido;
+            }
+            if($request->has('segundoApellido')){
+                $usuario->segundoApellido = $request->segundoApellido;
+            }
+
+            $usuario->save();
+
+            return response()->json([
+                'message' => 'Estudiante actualizado',
+                'usuario' => $usuario,
+                'status' => 200
+            ],200);
+        }catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 404,
+            ], 404);
+        }catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Datos invalidados.',
+                'errores' => $e->getMessage(),
+                'status' => 422,
+            ], 422);
         }
-
-        $validacion = Validator::make($request->all(),[
-            'nombre' =>'string', 'regex:/^(?!\s)(?!.*\s$)[a-zA-Z\s]*[a-zA-Z]+[a-zA-Z\s]*$/','max:45',
-            'primerApellido' =>'string' , 'regex:/^[a-zA-Z]+$/' ,'max:45',
-            'segundoApellido' => 'nullable','string', 'regex:/^[a-zA-Z]+$/','max:45'
-        ]);
-
-        if ($validacion -> fails()){
-            $data = [
-                'message' => 'Error en la validacion de datos',
-                'status' => 400,
-                'errores' => $validacion -> errors()
-            ];
-            return response()->json($data,400);
-        }
-
-        if($request->has('nombre')){
-            $usuario->nombre = $request->nombre;
-        }
-        if($request->has('primerApellido')){
-            $usuario->primerApellido = $request->primerApellido;
-        }
-        if($request->has('segundoApellido')){
-            $usuario->segundoApellido = $request->segundoApellido;
-        }
-
-        $usuario->save();
-
-        $data = [
-            'message' => 'Estudiante actualizado',
-            'usuario' => $usuario,
-            'status' => 200
-        ];
-
-        return response()->json($data,200);
-
     }
-
 }

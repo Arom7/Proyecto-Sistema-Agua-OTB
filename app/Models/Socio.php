@@ -108,4 +108,29 @@ class Socio extends Model
         }
         return true;
     }
+
+    //Validar datos del socio
+    public static function validar_socio($data){
+        $reglas = [
+            'nombre' => ['sometimes', 'string', 'regex:/^(?!\s)(?!.\s$)[a-zA-Z\s][a-zA-Z]+[a-zA-Z\s]*$/', 'max:85'],
+            'primerApellido' => ['sometimes', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
+            'segundoApellido' => ['sometimes', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
+            'ci' => ['sometimes', 'string', 'regex:/^[a-zA-Z0-9]+$/', 'max:20'],
+        ];
+
+        $messages = [
+            'nombre.regex' => 'Tu nombre solo puede contener letras y espacios.',
+            'primerApellido.regex' => 'Tu primer apellido solo puede contener letras.',
+            'segundoApellido.regex' => 'Tu segundo apellido solo puede contener letras',
+            'ci.regex' => 'El CI solo puede contener letras y números.',
+        ];
+
+        $validacion = Validator::make($data,$reglas,$messages);
+
+        if($validacion->fails()){
+            throw new ValidationException($validacion);
+        }
+
+        return true;
+    }
 }
