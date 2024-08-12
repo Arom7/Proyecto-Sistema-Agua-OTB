@@ -16,31 +16,7 @@ class cuentaController extends Controller
     //Funcion de verificacion
     public function login(Request $request){
 
-        $validacion = Validator::make($request->all(),[
-            // Reglas de validacion
-            'username' => [
-                'required',
-                'string',
-                'regex:/^(?!\s)(?!.*\s$)[a-zA-Z\s]*[a-zA-Z]+[a-zA-Z\s]*$/',
-                'max:45',
-            ],
-            'contrasenia' => [
-                'required',
-                'string' ,
-                'regex:/^[a-zA-Z]+$/',
-                'min:8' ,
-                'max:255'
-            ]
-        ]);
-
-        if($validacion->fails()){
-            $data = [
-                'message' => 'Error en la validacion de datos',
-                'status' => 400,
-                'errores' => $validacion -> errors()
-            ];
-            return response()->json($data,400);
-        }
+        Usuario::validar($request->all());
 
         $username = $request->username;
         //Esto puede ser almacenado en el modelo, considerar este cambio
@@ -50,24 +26,21 @@ class cuentaController extends Controller
             $cuenta = Usuario::find($username);
             //Verificamos si la cadena sin cifrar coincide con su hash cifrado correspondiente almacenado en la base de datos
             if (Hash::check($request->contrasenia,$cuenta->contrasenia)){
-                $data = [
+                return response()->json([
                     'message' => 'Ingreso valido.',
                     'status' => 200,
-                ];
-                return response()->json($data,200);
+                ],200);
             }else{
-                $data = [
+                return response()->json([
                     'message' => 'Contrasenia incorrecta.',
                     'status' => 400,
-                ];
-                return response()->json($data,400);
+                ],400);
             }
         }else{
-            $data = [
+            return response()->json([
                 'message' => 'Usuario no encontrado. Registrese por favor.',
                 'status' => 404,
-            ];
-            return response()->json($data,404);
+            ],404);
         }
     }
 }

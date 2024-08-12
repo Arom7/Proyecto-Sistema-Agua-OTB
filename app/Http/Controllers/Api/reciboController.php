@@ -137,7 +137,23 @@ class reciboController extends Controller
      */
     public function show(string $id)
     {
-        //
+        try{
+            $recibo = Recibo::find($id);
+
+            if(!$recibo){
+                throw new ModelNotFoundException('Recibo no encontrado');
+            }
+
+            return response()->json([
+                'usuario' => $recibo,
+                'status' => 200
+            ],200);
+        }catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 404,
+            ], 404);
+        }
     }
 
     /**
@@ -145,7 +161,43 @@ class reciboController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        try{
+            $recibo = Recibo::find($id);
+
+            if(!$recibo){
+                throw new ModelNotFoundException('Recibo no encontrado');
+            }
+
+            Recibo::validar($request->all());
+
+            $recibo->observaciones = $request->observaciones;
+
+            $recibo->save();
+
+            return response()->json([
+                'message' => 'Datos actualizados',
+                'usuario' => $recibo,
+                'status' => 200
+            ],200);
+
+        }catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 404,
+            ], 404);
+        }catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Datos invalidados.',
+                'errores' => $e->getMessage(),
+                'status' => 422,
+            ], 422);
+        }catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor.',
+                'error' => $e->getMessage(),
+                'status' => 500
+            ], 500);
+        }
     }
 
     /**
@@ -153,6 +205,24 @@ class reciboController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try{
+            $recibo = Recibo::find($id);
+
+            if(!$recibo){
+                throw new ModelNotFoundException('Socio no encontrado');
+            }
+
+            $recibo -> delete();
+
+            return response()->json([
+                'message' => 'Usuario eliminado',
+                'status' => 200
+            ],200);
+        }catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 404,
+            ], 404);
+        }
     }
 }

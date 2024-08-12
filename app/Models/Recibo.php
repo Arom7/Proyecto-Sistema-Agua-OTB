@@ -28,10 +28,8 @@ class Recibo extends Model
         return $this->belongsTo(Consumo::class , 'id_consumo_recibo' , 'id_consumo');
     }
 
-
     //Validacion Recibo
     public static function validar($data){
-
         $reglas = [
             'observaciones' => 'regex:/^[a-zA-Z0-9]+$/',
         ];
@@ -60,7 +58,7 @@ class Recibo extends Model
         }elseif($consumo<51){
             return $consumo + (38 + ($consumo-41) * 3);
         }else{
-            return 115 + (($consumo-50)*10);
+            return 115 + (($consumo-50) * 10);
         }
     }
 }

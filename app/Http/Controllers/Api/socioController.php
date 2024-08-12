@@ -116,7 +116,6 @@ class socioController extends Controller
     }
 
     public function show($id){
-
         try{
             $usuario = Socio::find($id);
 
@@ -158,8 +157,8 @@ class socioController extends Controller
         }
     }
 
-    public function update (Request $request,$id){
-
+    public function update (Request $request,$id)
+    {
         try{
             $socio = Socio::find($id);
 
