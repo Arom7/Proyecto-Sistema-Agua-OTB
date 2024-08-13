@@ -78,17 +78,14 @@ class reciboController extends Controller
                 throw new ModelNotFoundException('Medidor no encontrado');
             }
 
-            $ultima_medida = $medidor->ultima_medida;
-
+            $medidor->medida_inicial = $medidor->ultima_medida;
             $medidor->ultima_medida = $request->lectura_actual;
             $medidor->save();
-
-            $consumo_total = $request->lectura_actual - $ultima_medida;
 
             $consumo = Consumo::create([
                 'mes_correspondiente' => $request->mes_correspondiente,
                 'lectura_actual' => $request->lectura_actual,
-                'consumo_total' => $consumo_total,
+                'consumo_total' => $request->lectura_actual - $medidor->medida_inicial,
                 'propiedad_id_consumo' => $propiedad->id
             ]);
 
@@ -96,7 +93,7 @@ class reciboController extends Controller
 
             $recibo = Recibo::create([
                 'estado_pago' => false,
-                'total' => Recibo::calcularTotal($consumo_total),
+                'total' => Recibo::calcularTotal($consumo->consumo_total),
                 'fecha_lectura' => Carbon::now(),
                 'id_consumo_recibo' => $consumo->id,
                 'observaciones' => $request->observaciones
@@ -104,13 +101,13 @@ class reciboController extends Controller
 
             $recibo->save();
 
-            $data = [
+            return response()->json([
                 'message' => 'Socio encontrado',
                 'status' => 200,
                 'recibo' => $recibo,
                 'consumo' => $consumo,
-            ];
-            return response()->json($data, 200);
+                'medidor' => $medidor
+            ], 200);
             //Proceso realizado con exito
         } catch (ValidationException $e) {
             return response()->json([
@@ -169,14 +166,42 @@ class reciboController extends Controller
             }
 
             Recibo::validar($request->all());
+            Consumo::validar($request->all());
 
             $recibo->observaciones = $request->observaciones;
 
+            $consumo = Consumo::buscarConsumo($recibo->id_consumo_recibo);
+
+            if(!$consumo){
+                throw new ModelNotFoundException('Error en la busqueda del consumo de la propiedad');
+            }
+
+            $consumo->lectura_actual = $request->lectura_actual ;
+            $consumo->mes_correspondiente = $request->mes_correspondiente;
+
+            $medidor = Medidor::find($consumo->propiedad_id_consumo);
+            if(!$medidor){
+                throw new ModelNotFoundException('Error en la busqueda medidor de la propiedad');
+            }
+
+            $medidor->ultima_medida = $request->lectura_actual;
+            $consumo->consumo_total = $medidor->ultima_medida - $medidor->medida_inicial;
+
+            if($consumo->consumo_total < 0){
+                throw new \Exception("El consumo total no puede ser negativo", 400);
+            }
+
+            $recibo->total = Recibo::calcularTotal($consumo->consumo_total);
+
+            $medidor->save();
+            $consumo->save();
             $recibo->save();
 
             return response()->json([
                 'message' => 'Datos actualizados',
                 'usuario' => $recibo,
+                'medidor' => $medidor,
+                'consumo' => $consumo,
                 'status' => 200
             ],200);
 

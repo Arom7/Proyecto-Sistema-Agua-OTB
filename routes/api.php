@@ -60,8 +60,12 @@ Route::get('/recibos', [reciboController::class , 'index']);
 //Ruta para generar un nuevo recibo
 Route::post('/recibos',[reciboController::class , 'store']);
 
-//Ruta para
+//Ruta para visualizar un recibo
 Route::get('/recibos/{id}', [reciboController::class , 'show']);
+
+//Ruta para actualizar un recibo
+Route::put('/actualizar-recibo/{id}', [reciboController::class, 'update']);
+
 
 
 /**

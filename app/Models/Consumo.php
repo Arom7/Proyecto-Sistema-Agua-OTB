@@ -12,7 +12,7 @@ class Consumo extends Model
     use HasFactory;
 
     protected $table = 'consumos';
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'id_consumo';
 
     protected $fillable = [
         'lectura_actual',
@@ -28,6 +28,11 @@ class Consumo extends Model
 
     public function recibos(){
         return $this-> hasOne(Recibo::class, 'id_consumo_recibo' , 'propiedad_id_consumo');
+    }
+
+    public static function buscarConsumo($id_consumo_recibo){
+        return static::where('id_consumo', $id_consumo_recibo)
+                     ->first();
     }
 
     // Funcion validacion de datos consumo
@@ -47,7 +52,6 @@ class Consumo extends Model
         if($validacion->fails()){
             throw new ValidationException($validacion);
         }
-
         return true;
     }
  }
