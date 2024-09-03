@@ -17,10 +17,6 @@ use App\Http\Controllers\Api\socioController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 //Ruta para las funciones del usuario
 
 // Devuelve a los usuarios

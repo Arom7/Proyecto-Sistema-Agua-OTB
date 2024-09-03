@@ -226,7 +226,7 @@ class reciboController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from storage. //se debe eliminar recibos??
      */
     public function destroy(string $id)
     {
