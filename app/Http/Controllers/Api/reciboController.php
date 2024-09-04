@@ -9,10 +9,12 @@ use App\Models\Socio;
 use App\Models\Medidor;
 use App\Models\Consumo;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Psy\Readline\Hoa\Console;
 
 class reciboController extends Controller
 {
@@ -95,7 +97,7 @@ class reciboController extends Controller
                 'estado_pago' => false,
                 'total' => Recibo::calcularTotal($consumo->consumo_total),
                 'fecha_lectura' => Carbon::now(),
-                'id_consumo_recibo' => $consumo->id,
+                'id_consumo_recibo' => $consumo->id_consumo,
                 'observaciones' => $request->observaciones
             ]);
 
