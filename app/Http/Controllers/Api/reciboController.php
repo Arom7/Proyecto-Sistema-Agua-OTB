@@ -25,20 +25,36 @@ class reciboController extends Controller
     {
         try {
             $recibos = Recibo::all();
+
             if ($recibos->isEmpty()) {
                 $data = [
                     'message' => 'No se encontraron recibos',
                     'status' => 400
                 ];
                 return response()->json($data, 404);
-            } else {
-                $data = [
-                    'message' => 'Solicitud aceptada .Recibos encontrados',
-                    'status' => 200,
-                    'recibos' => $recibos
-                ];
-                return response()->json($data, 200);
             }
+
+            foreach($recibos as $recibo){
+                $id_consumo = $recibo->id_consumo_recibo;
+                $consumo = Consumo::find($id_consumo);
+                $id_propiedad = $consumo->propiedad_id_consumo;
+                $propiedad = Propiedad::find($id_propiedad);
+                $id_socio = $propiedad->socio_id;
+                $socio = Socio::find($id_socio);
+                $nombre_completo = $socio->nombre_socio . " " . $socio->primer_apellido_socio . " " . $socio->segundo_apellido_socio;
+                // Agregamos nombre completo
+                $recibo->nombre_completo = $nombre_completo;
+                // Agregamos lectura anterior y lectura actual
+                $medidor = Medidor::find($id_propiedad);
+                $recibo->lectura_actual = $medidor->ultima_medida;
+                $recibo->lectura_anterior = $medidor->medida_inicial;
+            }
+            $data = [
+                'message' => 'Solicitud aceptada .Recibos encontrados',
+                'status' => 200,
+                'recibos' => $recibos
+            ];
+            return response()->json($data, 200);
         } catch (\Exception $e) {
             $data = [
                 'message' => 'Error al obtener los recibos: ' . $e->getMessage(),
@@ -58,11 +74,10 @@ class reciboController extends Controller
          */
         try {
             // Formulario validacion Consumo / Recibo / Socio
-            Socio::validar_socio_recibo($request->all());
             Consumo::validar($request->all());
             Recibo::validar($request->all());
 
-            $id_socio = Socio::buscar_id_usuario($request->nombre, $request->primerApellido, $request->segundoApellido);
+            $id_socio = Socio::find($request -> id_socio);
 
             if (!$id_socio) {
                 throw new ModelNotFoundException('Socio no encontrado');
