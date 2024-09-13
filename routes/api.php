@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\cuentaController;
+use App\Http\Controllers\Api\multasController;
 use App\Http\Controllers\Api\propiedadController;
 use App\Http\Controllers\Api\reciboController;
 use Illuminate\Http\Request;
@@ -70,4 +71,20 @@ Route::put('/actualizar-recibo/{id}', [reciboController::class, 'update']);
 
  // Ruta para registrar propiedades a un usuario
  Route::get('/registro-propiedades',[propiedadController::class , 'store']);
+// Ruta para visualizar todas las propiedades
 
+//Ruta para visualizar todas las propiedades de un socio en especifico
+Route::get('/propiedades/socio/{id}', [propiedadController::class, 'show']);
+
+/**
+ * Rutas multas
+ */
+
+// Ruta para visualizar todas las multas
+Route::get('/multas',[multasController::class , 'index']);
+
+// Ruta para registrar una multa
+Route::post('/multas', [multasController::class , 'store']);
+
+// Ruta para actualizar una multa
+Route::put('/multas', [multasController::class , 'update']);

@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('multas', function (Blueprint $table) {
             $table->id();
-            $table->string('criterio_infracion');
-            $table->string('descripcion_infracion');
+            $table->string('criterio_infraccion');
+            $table->string('descripcion_infraccion');
             $table->double('monto_infraccion');
             $table->timestamps();
         });

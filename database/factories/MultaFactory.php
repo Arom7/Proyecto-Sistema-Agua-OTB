@@ -17,8 +17,8 @@ class MultaFactory extends Factory
     public function definition(): array
     {
         return [
-            'criterio_infracion'=>$this->faker->word,
-            'descripcion_infracion'=>$this->faker->sentence,
+            'criterio_infraccion'=>$this->faker->word,
+            'descripcion_infraccion'=>$this->faker->sentence,
             'monto_infraccion'=>$this->faker->randomFloat(2,1,100)
         ];
     }

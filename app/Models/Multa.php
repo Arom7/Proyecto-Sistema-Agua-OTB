@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class Multa extends Model
 {
@@ -25,6 +27,23 @@ class Multa extends Model
                     ->withTimestamps();
     }
 
+    public static function validar($data){
+        $reglas = [
+            'criterio_infraccion' => ['required', 'string'],
+            'descripcion_infraccion' => ['required', 'string'],
+            'monto_infraccion' => ['required', 'integer'],
+        ];
 
+        $message = [
+            'monto_infraccion.integer' => 'Solo debe ser un valor numerico'
+        ];
+
+        $validacion =  Validator::make($data,$reglas,$message);
+
+        if($validacion->fails()){
+            throw new ValidationException($validacion);
+        }
+        return true;
+    }
     //Mutadores y accesores
 }

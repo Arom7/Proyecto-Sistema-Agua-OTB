@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Propiedad;
 use Illuminate\Http\Request;
 
 class propiedadController extends Controller
@@ -14,6 +15,14 @@ class propiedadController extends Controller
     {
         //
     }
+
+    /**
+     * Lista de propiedades
+     */
+    public function propiedadeSocio(Request $request){
+
+    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -28,7 +37,29 @@ class propiedadController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $lista_propiedades = Propiedad::buscar_id_propiedad_unica($id);
+        try{
+            if ($lista_propiedades->isEmpty()) {
+                $data = [
+                    'message' => 'No se tiene propiedades registradas de este socio',
+                    'status' => 400
+                ];
+                return response()->json($data, 200);
+            }
+
+            $data = [
+                'message' => 'Solicitud aceptada .Propiedades encontrados',
+                'status' => 200,
+                'propiedades' => $lista_propiedades
+            ];
+            return response()->json($data, 200);
+        }catch (\Exception $e) {
+            $data = [
+                'message' => 'Error al obtener los recibos: ' . $e->getMessage(),
+                'status' => 500
+            ];
+            return response()->json($data, 500);
+        }
     }
 
     /**
