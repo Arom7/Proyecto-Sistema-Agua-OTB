@@ -31,11 +31,11 @@ class Multa extends Model
         $reglas = [
             'criterio_infraccion' => ['required', 'string'],
             'descripcion_infraccion' => ['required', 'string'],
-            'monto_infraccion' => ['required', 'integer'],
+            'monto_infraccion' => ['required', 'numeric'],
         ];
 
         $message = [
-            'monto_infraccion.integer' => 'Solo debe ser un valor numerico'
+            'monto_infraccion.numeric' => 'Este campo debe ser un valor numerico'
         ];
 
         $validacion =  Validator::make($data,$reglas,$message);

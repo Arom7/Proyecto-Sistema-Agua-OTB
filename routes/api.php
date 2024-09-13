@@ -87,4 +87,4 @@ Route::get('/multas',[multasController::class , 'index']);
 Route::post('/multas', [multasController::class , 'store']);
 
 // Ruta para actualizar una multa
-Route::put('/multas', [multasController::class , 'update']);
+Route::put('/multas/{id}', [multasController::class , 'update']);

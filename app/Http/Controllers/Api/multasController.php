@@ -97,7 +97,26 @@ class multasController extends Controller
     public function update(Request $request, string $id)
     {
         try{
-            
+            $multa = Multa::find($id);
+
+            if(!$multa){
+                throw new ModelNotFoundException('Multa no encontrada');
+            }
+
+            Multa::validar($request->all());
+
+            $multa->criterio_infraccion = $request->criterio_infraccion; 
+            $multa->descripcion_infraccion = $request->descripcion_infraccion;
+            $multa->monto_infraccion = $request->monto_infraccion;
+
+            $multa->save();
+
+            return response()->json([
+                'message' => 'Datos actualizados',
+                'status' => 200,
+                'multa' => $multa,
+            ],200);
+
         }catch (ModelNotFoundException $e) {
             return response()->json([
                 'message' => $e->getMessage(),
