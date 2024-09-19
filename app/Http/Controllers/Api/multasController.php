@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Multa;
+use App\Models\Propiedad;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -105,7 +107,7 @@ class multasController extends Controller
 
             Multa::validar($request->all());
 
-            $multa->criterio_infraccion = $request->criterio_infraccion; 
+            $multa->criterio_infraccion = $request->criterio_infraccion;
             $multa->descripcion_infraccion = $request->descripcion_infraccion;
             $multa->monto_infraccion = $request->monto_infraccion;
 
@@ -143,5 +145,47 @@ class multasController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    /**
+     * Funcion que enlaza una multa con un propietario.
+     */
+    public function enlazarMulta(Request $request){
+        try{
+            $multa = Multa::find($request->infracion_id);
+            $propiedad = Propiedad::find($request->propiedad_id);
+
+            if(!$multa){
+                throw new ModelNotFoundException('Multa no encontrada');
+            }
+
+            if(!$propiedad){
+                throw new ModelNotFoundException('Propiedad no encontrada');
+            }
+
+            $propiedad->multas()->attach($multa->id,[
+                'fecha_multa' => Carbon::now(),
+                'estado_pago' => false
+            ]);
+
+            return response()->json([
+                'message' => 'Multa enlazada a la propiedad',
+                'status' => 200,
+                'multa' => $multa,
+                'propiedad' => $propiedad
+            ], 200);
+
+        }catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 404,
+            ], 404);
+        }catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor.',
+                'error' => $e->getMessage(),
+                'status' => 500
+            ], 500);
+        }
     }
 }

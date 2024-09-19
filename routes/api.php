@@ -35,6 +35,8 @@ Route::patch('/actualizar/socio/{id}',[socioController::class, 'update_parcial']
 
 // Eliminar al usuario
 Route::delete('/socios/{id}', [socioController::class, 'destroy']);
+// Ruta para visualizar las propiedades de un socio
+Route::get('/propiedades/socios', [socioController::class, 'propiedades']);
 
 
 /*
@@ -88,3 +90,7 @@ Route::post('/multas', [multasController::class , 'store']);
 
 // Ruta para actualizar una multa
 Route::put('/multas/{id}', [multasController::class , 'update']);
+
+
+// Ruta para enlazar una multa a un propietario
+Route::post('/propietario/multa', [multasController::class, 'enlazarMulta']);

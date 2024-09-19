@@ -235,4 +235,28 @@ class socioController extends Controller
             ], 422);
         }
     }
+
+    public function propiedades(){
+        try{
+            $sociosPropiedades = Socio::with('propiedades')->get();
+
+            if($sociosPropiedades->isEmpty()){
+                return response()->json([
+                    'message' => 'Lista vacia, socios y propiedades no encontradas',
+                    'status' => 400,
+                ],404);
+            }else{
+                return response()->json([
+                    'message' => 'Socios con sus respectivas propiedades encontradas',
+                    'status' => 200,
+                    'socios' => $sociosPropiedades
+                ],200);
+            }
+        }catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 404,
+            ], 404);
+        }
+    }
 }
