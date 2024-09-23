@@ -61,4 +61,10 @@ class Recibo extends Model
             return 115 + (($consumo-50) * 10);
         }
     }
+
+    public static function buscarRecibosFecha($consumo, $fecha_inicio, $fecha_fin){
+        return static::where('id_consumo_recibo',$consumo->id_consumo)
+                        ->whereBetween('fecha_lectura', [$fecha_inicio, $fecha_fin])
+                        ->get();
+    }
 }

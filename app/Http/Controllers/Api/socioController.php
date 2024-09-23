@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Consumo;
 use App\Models\Usuario;
+use App\Models\Recibo;
 use Illuminate\Http\Request;
 use App\Models\Socio;
 use Illuminate\Support\Facades\Hash;
@@ -250,6 +252,44 @@ class socioController extends Controller
                     'message' => 'Socios con sus respectivas propiedades encontradas',
                     'status' => 200,
                     'socios' => $sociosPropiedades
+                ],200);
+            }
+        }catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 404,
+            ], 404);
+        }
+    }
+
+    public function socio_recibo($fecha_inicio , $fecha_fin){
+        try{
+            $sociosRecibos = Socio::with('propiedades')->get();
+
+            foreach ($sociosRecibos as $socio) {
+                foreach ($socio->propiedades as $propiedad) {
+                    $recibos = collect();
+                    $consumos = Consumo::where('propiedad_id_consumo',$propiedad->id)->get();
+                    foreach ($consumos as $consumo) {
+                        $recibosConsumo = Recibo::buscarRecibosFecha($consumo,$fecha_inicio,$fecha_fin);
+                        if(!$recibosConsumo->isEmpty()){
+                            $recibos = $recibos->concat($recibosConsumo);
+                        }
+                    }
+                    $propiedad->setAttribute('recibos', $recibos);
+                }
+            }
+
+            if($sociosRecibos->isEmpty()){
+                return response()->json([
+                    'message' => 'Lista vacia, socios y recibos no encontrados',
+                    'status' => 400,
+                ],404);
+            }else{
+                return response()->json([
+                    'message' => 'Socios con sus respectivos recibos encontrados',
+                    'status' => 200,
+                    'socios' => $sociosRecibos
                 ],200);
             }
         }catch (ModelNotFoundException $e) {

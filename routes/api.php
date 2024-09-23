@@ -94,3 +94,6 @@ Route::put('/multas/{id}', [multasController::class , 'update']);
 
 // Ruta para enlazar una multa a un propietario
 Route::post('/propietario/multa', [multasController::class, 'enlazarMulta']);
+
+// Ruta para visualizar las recibos de un propietario
+Route::get('/socio/recibo/{fecha_inicio}/{fecha_fin}', [socioController::class, 'socio_recibo']);
