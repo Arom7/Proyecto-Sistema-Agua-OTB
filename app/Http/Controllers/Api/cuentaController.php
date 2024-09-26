@@ -6,25 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Usuario;
 
 use Illuminate\Http\Request;
-// Libreria para realizar la validacion
-use Illuminate\Support\Facades\Validator;
-// Libreria para encriptar contasenias
 use Illuminate\Support\Facades\Hash;
 
 class cuentaController extends Controller
 {
     //Funcion de verificacion
     public function login(Request $request){
+        info('Datos recibidos de la solicitud', $request->all());
 
         Usuario::validar($request->all());
-
-        $username = $request->username;
-        //Esto puede ser almacenado en el modelo, considerar este cambio
-        $verificar_cuenta = Usuario::cuentaExistente($username);
-        //verificamos si la cuenta existe
-        if($verificar_cuenta){
-            $cuenta = Usuario::find($username);
-            //Verificamos si la cadena sin cifrar coincide con su hash cifrado correspondiente almacenado en la base de datos
+        if(Usuario::cuentaExistente($request->username)){
+            $cuenta = Usuario::find($request->username);
             if (Hash::check($request->contrasenia,$cuenta->contrasenia)){
                 return response()->json([
                     'message' => 'Ingreso valido.',

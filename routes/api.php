@@ -7,6 +7,9 @@ use App\Http\Controllers\Api\reciboController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\socioController;
+use App\Http\Controllers\Api\UsuarioController;
+use App\Models\Usuario;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -17,8 +20,11 @@ use App\Http\Controllers\Api\socioController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
 //Ruta para las funciones del usuario
+
+Route::get('/', function () {
+    return view('welcome');
+});
 
 // Devuelve a los usuarios
 Route::get('/socios',[socioController::class, 'index']);
@@ -44,9 +50,11 @@ Route::get('/propiedades/socios', [socioController::class, 'propiedades']);
 */
 
 // Ingreso a login
-Route:: post('/login',[cuentaController::class, 'login']);
+Route::post('/acceso-socios',[UsuarioController::class, 'login']);
 // Registro usuarios
 Route::post('/registrar-socios',[socioController::class, 'store']);
+
+Route::post('/ingreso-cuentas',[UsuarioController::class, 'store']);
 
 
 /**

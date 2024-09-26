@@ -62,22 +62,49 @@ class Usuario extends Authenticatable
                      ->exists();
     }
 
+    public static function generarUsername ($data){
+        $username = strtolower(substr($data->nombre_socio,0,2).substr($data->primer_apellido_socio,0,2).substr($data->segundo_apellido_socio,0,2).rand(1000,9999));
+        if(!Usuario::cuentaExistente($username)){
+            return $username;
+        }else{
+            return Usuario::generarUsername($data);
+        }
+    }
+
     public static function validar($data){
         $rules = [
-            'username' => ['required', 'string' , 'regex:/^[a-zA-Z0-9]+$/', 'min: 6', 'max:15'],
             'email' => ['required', 'email', 'unique:usuarios,email'],
             'contrasenia' => ['required', 'string' , 'regex:/^[\w\s!@#$%^&*()_+\-=\[\]{};:"\\|,.<>\/?~`]+$/' , 'min:8']
         ];
 
         $message = [
-            'username.regex' => 'Su username debe contener solo letras mayusculas o minusculas ademas de numeros.',
             'email.email' => 'El campo debe ser una direccion electronica valida',
             'email.unique' => 'El correo ya se encuentra registrado.',
             'contrasenia.regex' => ' Combinar entre mayusculas, minusculas, numeros y caracteres especiales.',
             'contrasenia.min' => 'La contrasenia debe contener al menos 8 caracteres.'
         ];
 
-        $validacion = Validator::make($data,$rules , $message);
+        $validacion = Validator::make($data, $rules , $message);
+
+        if ($validacion -> fails()){
+            throw new ValidationException($validacion);
+        }
+
+        return true;
+    }
+
+    public static function validarIngreso($data){
+        $rules = [
+            'username' => ['required', 'string'],
+            'contrasenia' => ['required', 'string']
+        ];
+
+        $message = [
+            'username.required' => 'El campo usuario es requerido',
+            'contrasenia.required' => 'El campo contrasenia es requerido'
+        ];
+
+        $validacion = Validator::make($data, $rules, $message);
 
         if ($validacion -> fails()){
             throw new ValidationException($validacion);

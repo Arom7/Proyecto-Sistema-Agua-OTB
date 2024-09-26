@@ -46,18 +46,14 @@ class Socio extends Model
         return $this->belongsTo(Otb::class,'otb_id','id');
     }
 
-    public static function usuarioExistente($nombre, $primerApellido, $segundoApellido)
+    public static function usuarioExistente($ci_socio)
     {
-        return static::where('nombre_socio', $nombre)
-                     ->where('primer_apellido_socio', $primerApellido)
-                     ->where('segundo_apellido_socio', $segundoApellido)
+        return static::where('ci_socio', $ci_socio)
                      ->exists();
     }
 
-    public static function buscar_id_usuario($nombre, $primerApellido, $segundoApellido){
-        return static::where('nombre_socio', $nombre)
-                     ->where('primer_apellido_socio', $primerApellido)
-                     ->where('segundo_apellido_socio', $segundoApellido)
+    public static function buscar_id_usuario($ci_socio){
+        return static::where('ci_socio', $ci_socio)
                      ->select('id')
                      ->first();
     }
@@ -65,17 +61,18 @@ class Socio extends Model
     //Validacion de datos socios registro
     public static function validar($data){
         $reglas = [
-            'nombre' => ['required', 'string', 'regex:/^(?! )[a-zA-Z]+( [a-zA-Z]+)*$/', 'max:85'],
-            'primer_apellido' => ['required', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
-            'segundo_apellido' => ['nullable', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
-            'ci' => ['required', 'string', 'regex:/^[a-zA-Z0-9]+$/', 'max:40'],
+            'nombre_socio' => ['required', 'string', 'regex:/^(?! )[a-zA-Z]+( [a-zA-Z]+)*$/', 'max:85'],
+            'primer_apellido_socio' => ['required', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
+            'segundo_apellido_socio' => ['nullable', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
+            'ci_socio' => ['required', 'string', 'regex:/^[a-zA-Z0-9]+$/', 'max:40','unique:socios,ci_socio'],
         ];
 
         $messages = [
-            'nombre.regex' => 'Tu nombre solo puede contener letras y espacios.',
-            'primer_apellido.regex' => 'Tu primer apellido solo puede contener letras.',
-            'segundo_apellido.regex' => 'Tu segundo apellido solo puede contener letras',
-            'ci.regex' => 'El CI solo puede contener letras y números.',
+            'nombre_socio.regex' => 'Tu nombre solo puede contener letras y espacios.',
+            'primer_apellido_socio.regex' => 'Tu primer apellido solo puede contener letras.',
+            'segundo_apellido_socio.regex' => 'Tu segundo apellido solo puede contener letras',
+            'ci_socio.regex' => 'El CI solo puede contener letras y números.',
+            'ci_socio.unique' => 'El CI ya se encuentra registrado.',
         ];
 
 
@@ -91,15 +88,15 @@ class Socio extends Model
     //Validacion de datos socios recibo
     public static function validar_socio_recibo($data){
         $reglas = [
-            'nombre' => ['required', 'string', 'regex:/^(?!\s)(?!.*\s$)[a-zA-Z\s]*[a-zA-Z]+[a-zA-Z\s]*$/', 'max:85'],
-            'primerApellido' => ['required', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
-            'segundoApellido' => ['nullable', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
+            'nombre_socio' => ['required', 'string', 'regex:/^(?!\s)(?!.*\s$)[a-zA-Z\s]*[a-zA-Z]+[a-zA-Z\s]*$/', 'max:85'],
+            'primer_apellido_socio' => ['required', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
+            'segundo_apellido_socio' => ['nullable', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
         ];
 
         $messages = [
-            'nombre.regex' => 'Tu nombre solo puede contener letras y espacios.',
-            'primerApellido.regex' => 'Tu primer apellido solo puede contener letras.',
-            'segundoApellido.regex' => 'Tu segundo apellido solo puede contener letras',
+            'nombre_socio.regex' => 'Tu nombre solo puede contener letras y espacios.',
+            'primer_apellido_socio.regex' => 'Tu primer apellido solo puede contener letras.',
+            'segundo_apellido_socio.regex' => 'Tu segundo apellido solo puede contener letras',
         ];
 
         $validacion = Validator::make($data,$reglas,$messages);
@@ -112,17 +109,17 @@ class Socio extends Model
     //Validar datos del socio
     public static function validar_socio($data){
         $reglas = [
-            'nombre' => ['sometimes', 'string', 'regex:/^(?!\s)(?!.\s$)[a-zA-Z\s][a-zA-Z]+[a-zA-Z\s]*$/', 'max:85'],
-            'primerApellido' => ['sometimes', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
-            'segundoApellido' => ['sometimes', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
-            'ci' => ['sometimes', 'string', 'regex:/^[a-zA-Z0-9]+$/', 'max:20'],
+            'nombre_socio' => ['sometimes', 'string', 'regex:/^(?!\s)(?!.\s$)[a-zA-Z\s][a-zA-Z]+[a-zA-Z\s]*$/', 'max:85'],
+            'primer_apellido_socio' => ['sometimes', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
+            'segundo_apellido_socio' => ['sometimes', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
+            'ci_socio' => ['sometimes', 'string', 'regex:/^[a-zA-Z0-9]+$/', 'max:20'],
         ];
 
         $messages = [
-            'nombre.regex' => 'Tu nombre solo puede contener letras y espacios.',
-            'primerApellido.regex' => 'Tu primer apellido solo puede contener letras.',
-            'segundoApellido.regex' => 'Tu segundo apellido solo puede contener letras',
-            'ci.regex' => 'El CI solo puede contener letras y números.',
+            'nombre_socio.regex' => 'Tu nombre solo puede contener letras y espacios.',
+            'primer_apellido_socio.regex' => 'Tu primer apellido solo puede contener letras.',
+            'segundo_apellido_socio.regex' => 'Tu segundo apellido solo puede contener letras',
+            'ci_socio.regex' => 'El CI solo puede contener letras y números.',
         ];
 
         $validacion = Validator::make($data,$reglas,$messages);

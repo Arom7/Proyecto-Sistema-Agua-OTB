@@ -8,6 +8,7 @@ use App\Models\Usuario;
 use App\Models\Recibo;
 use Illuminate\Http\Request;
 use App\Models\Socio;
+use Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
@@ -43,54 +44,53 @@ class socioController extends Controller
     public function store (Request $request)
     {
         try {
-
+            info('Datos recibidos de la solicitud', $request->all());
             Socio::validar($request->all());
             Usuario::validar($request->all());
 
-            $esta_registrado = Socio::usuarioExistente($request->nombre,$request->primer_apellido,$request->segundo_apellido);
+            $esta_registrado = Socio::usuarioExistente($request->ci_socio);
 
             if(!$esta_registrado){
                 $socio = Socio::create([
-                    'nombre_socio' => $request->nombre,
-                    'primer_apellido_socio' => $request->primer_apellido,
-                    'segundo_apellido_socio' => $request->segundo_apellido,
-                    'ci_socio' => $request->ci,
+                    'nombre_socio' => $request->nombre_socio,
+                    'primer_apellido_socio' => $request->primer_apellido_socio,
+                    'segundo_apellido_socio' => $request->segundo_apellido_socio,
+                    'ci_socio' => $request->ci_socio,
                     'otb_id' => 1
                 ]);
+            }else{
+                throw new Exception('El socio ya se encuentra registrado');
             }
 
-            $esta_registrada_cuenta = Usuario::cuentaExistente($request->username);
+            $username = Usuario::generarUsername($socio);
 
-            if(!$esta_registrada_cuenta){
+            if(!Usuario::cuentaExistente($username)){
 
-                $id_usuario = Socio::buscar_id_usuario($request->nombre,$request->primer_apellido,$request->segundo_apellido);
+                $id_usuario = Socio::buscar_id_usuario($request->ci_socio);
 
                 if(!$id_usuario){
-                    throw new ModelNotFoundException('Propiedad no encontrada');
+                    throw new ModelNotFoundException('Socio no encontrado, registro no terminado');
                 }
 
                 $cuenta = Usuario::create([
-                    'username' => $request->username,
+                    'username' => $username,
                     'contrasenia' => Hash::make($request->contrasenia),
                     'email' => $request->email,
                     'socio_id_usuario' => $id_usuario->id,
                 ]);
 
-                //$cuenta->socio_id_usuario = $id_usuario;
                 $cuenta->save();
 
-                $data = [
+                return response()->json([
                     'message' => 'Cuenta creada exitosamente.',
                     'status' => 201,
                     'usuario' => $cuenta
-                ];
-                return response()->json($data, 201);
+                ], 201);
             }else{
-                $data = [
+                return response()->json([
                     'message' => 'Usuario y cuenta ya registrados.',
                     'status' => 200
-                ];
-                return response()->json($data, 200);
+                ], 200);
             }
 
         }catch (ModelNotFoundException $e) {
