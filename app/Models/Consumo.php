@@ -38,7 +38,6 @@ class Consumo extends Model
     // Funcion validacion de datos consumo
     public static function validar($data){
         $reglas = [
-            'mes_correspondiente' => ['required', 'date'],
             'lectura_actual'=> ['required', 'integer'],
         ];
 

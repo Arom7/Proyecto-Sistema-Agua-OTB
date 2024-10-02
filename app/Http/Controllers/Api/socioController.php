@@ -11,8 +11,8 @@ use App\Models\Socio;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 
 class socioController extends Controller
 {
@@ -43,8 +43,8 @@ class socioController extends Controller
 
     public function store (Request $request)
     {
+        DB::beginTransaction();
         try {
-            info('Datos recibidos de la solicitud', $request->all());
             Socio::validar($request->all());
             Usuario::validar($request->all());
 
@@ -78,22 +78,18 @@ class socioController extends Controller
                     'email' => $request->email,
                     'socio_id_usuario' => $id_usuario->id,
                 ]);
-
-                $cuenta->save();
-
+                DB::commit();
                 return response()->json([
                     'message' => 'Cuenta creada exitosamente.',
                     'status' => 201,
                     'usuario' => $cuenta
                 ], 201);
             }else{
-                return response()->json([
-                    'message' => 'Usuario y cuenta ya registrados.',
-                    'status' => 200
-                ], 200);
+                throw new Exception('El usuario ya se encuentra registrado');
             }
 
         }catch (ModelNotFoundException $e) {
+            DB::rollBack();
             return response()->json([
                 'message' => $e->getMessage(),
                 'status' => 404,
@@ -110,6 +106,7 @@ class socioController extends Controller
                 'status' => 500,
             ], 500);
         }catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'message' => 'Error al crear el usuario: ' . $e->getMessage(),
                 'status' => 500,
@@ -240,7 +237,7 @@ class socioController extends Controller
 
     public function propiedades(){
         try{
-            $sociosPropiedades = Socio::with('propiedades')->get();
+            $sociosPropiedades = Socio::with('propiedades', 'usuarios')->get();
 
             if($sociosPropiedades->isEmpty()){
                 return response()->json([

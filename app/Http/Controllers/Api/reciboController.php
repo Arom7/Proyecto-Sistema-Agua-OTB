@@ -9,6 +9,7 @@ use App\Models\Socio;
 use App\Models\Medidor;
 use App\Models\Consumo;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -34,13 +35,12 @@ class reciboController extends Controller
                 $id_consumo = $recibo->id_consumo_recibo;
                 $consumo = Consumo::find($id_consumo);
                 $id_propiedad = $consumo->propiedad_id_consumo;
+                $recibo->codigo_propiedad = $id_propiedad;
                 $propiedad = Propiedad::find($id_propiedad);
                 $id_socio = $propiedad->socio_id;
                 $socio = Socio::find($id_socio);
                 $nombre_completo = $socio->nombre_socio . " " . $socio->primer_apellido_socio . " " . $socio->segundo_apellido_socio;
-                // Agregamos nombre completo
                 $recibo->nombre_completo = $nombre_completo;
-                // Agregamos lectura anterior y lectura actual
                 $medidor = Medidor::find($id_propiedad);
                 $recibo->lectura_actual = $medidor->ultima_medida;
                 $recibo->lectura_anterior = $medidor->medida_inicial;
@@ -65,9 +65,7 @@ class reciboController extends Controller
      */
     public function store(Request $request)
     {
-        /**
-         * Se realiza el llamado a la funcion de busqueda
-         */
+        DB::beginTransaction();
         try {
             // Formulario validacion Consumo / Recibo / Socio
             Consumo::validar($request->all());
@@ -79,7 +77,7 @@ class reciboController extends Controller
                 throw new ModelNotFoundException('Socio no encontrado');
             }
 
-            $propiedad = Propiedad::buscar_id_propiedad($id_socio->id, $request->cuadra);
+            $propiedad = Propiedad::buscar_id_propiedad($id_socio->id, $request->codigo_propiedad);
 
             if (!$propiedad) {
                 throw new ModelNotFoundException('Propiedad no encontrada');
@@ -96,7 +94,7 @@ class reciboController extends Controller
             $medidor->save();
 
             $consumo = Consumo::create([
-                'mes_correspondiente' => $request->mes_correspondiente,
+                'mes_correspondiente' => Carbon::now()->subMonth()->day(20),
                 'lectura_actual' => $request->lectura_actual,
                 'consumo_total' => $request->lectura_actual - $medidor->medida_inicial,
                 'propiedad_id_consumo' => $propiedad->id
@@ -114,6 +112,8 @@ class reciboController extends Controller
 
             $recibo->save();
 
+            DB::commit();
+
             return response()->json([
                 'message' => 'Socio encontrado',
                 'status' => 200,
@@ -129,6 +129,7 @@ class reciboController extends Controller
                 'status' => 422,
             ], 422);
         }catch (ModelNotFoundException $e) {
+            DB::rollBack();
             return response()->json([
                 'message' => $e->getMessage(),
                 'status' => 404,
@@ -171,6 +172,7 @@ class reciboController extends Controller
      */
     public function update(Request $request, string $id)
     {
+
         try{
             $recibo = Recibo::find($id);
 
@@ -181,6 +183,7 @@ class reciboController extends Controller
             Recibo::validar($request->all());
             Consumo::validar($request->all());
 
+            DB::beginTransaction();
             $recibo->observaciones = $request->observaciones;
 
             $consumo = Consumo::buscarConsumo($recibo->id_consumo_recibo);
@@ -210,6 +213,7 @@ class reciboController extends Controller
             $consumo->save();
             $recibo->save();
 
+            DB::commit();
             return response()->json([
                 'message' => 'Datos actualizados',
                 'usuario' => $recibo,
@@ -219,6 +223,7 @@ class reciboController extends Controller
             ],200);
 
         }catch (ModelNotFoundException $e) {
+            DB::rollBack();
             return response()->json([
                 'message' => $e->getMessage(),
                 'status' => 404,
@@ -230,6 +235,7 @@ class reciboController extends Controller
                 'status' => 422,
             ], 422);
         }catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'message' => 'Error interno del servidor.',
                 'error' => $e->getMessage(),

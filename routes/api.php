@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\cuentaController;
+use App\Http\Controllers\Api\medidorController;
 use App\Http\Controllers\Api\multasController;
 use App\Http\Controllers\Api\propiedadController;
 use App\Http\Controllers\Api\reciboController;
@@ -49,8 +50,6 @@ Route::get('/propiedades/socios', [socioController::class, 'propiedades']);
   * Rutas para registrar nuevos socios y logueo de cuentas
 */
 
-// Ingreso a login
-Route::post('/acceso-socios',[UsuarioController::class, 'login']);
 // Registro usuarios
 Route::post('/registrar-socios',[socioController::class, 'store']);
 
@@ -105,3 +104,6 @@ Route::post('/propietario/multa', [multasController::class, 'enlazarMulta']);
 
 // Ruta para visualizar las recibos de un propietario
 Route::get('/socio/recibo/{fecha_inicio}/{fecha_fin}', [socioController::class, 'socio_recibo']);
+
+
+Route::get('/busqueda-medidor/propiedades/{id}',[medidorController::class, 'show']);

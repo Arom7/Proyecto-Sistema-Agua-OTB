@@ -41,4 +41,10 @@ class Medidor extends Model
         return static ::where('propiedad_id_medidor' , $propiedad_id)
                       ->first();
     }
+
+    public static function busquedaMedidorPorId($id_medidor){
+        return static ::where('id_medidor' , $id_medidor)
+                      ->with('propiedad', 'propiedad.socio')
+                      ->first();
+    }
 }
