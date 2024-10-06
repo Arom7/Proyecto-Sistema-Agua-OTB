@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Usuario;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UsuarioController extends Controller
 {
@@ -30,11 +31,19 @@ class UsuarioController extends Controller
                         'status' => 200,
                     ], 200);
                 } else {
-                    throw new \Exception('Contrasenia incorrecta.');
+                    return response()->json([
+                        'message' => 'Contrasenia incorrecta.',
+                        'status' => 401,
+                    ], 200);
                 }
             } else {
-                throw new \Exception('Usuario no encontrado. Registrese por favor.');
+                throw new ModelNotFoundException('Usuario no encontrado. Registrese por favor.');
             }
+        } catch (ModelNotFoundException $e) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'status' => 404,
+                ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al obtener los usuarios: ' . $e->getMessage(),

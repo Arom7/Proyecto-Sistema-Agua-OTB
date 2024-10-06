@@ -8,6 +8,7 @@ use App\Models\Recibo;
 use App\Models\Socio;
 use App\Models\Medidor;
 use App\Models\Consumo;
+use App\Models\Multa;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -37,6 +38,7 @@ class reciboController extends Controller
                 $id_propiedad = $consumo->propiedad_id_consumo;
                 $recibo->codigo_propiedad = $id_propiedad;
                 $propiedad = Propiedad::find($id_propiedad);
+                $recibo->multa_propiedad = Multa::multasPorPropiedad($id_propiedad);
                 $id_socio = $propiedad->socio_id;
                 $socio = Socio::find($id_socio);
                 $nombre_completo = $socio->nombre_socio . " " . $socio->primer_apellido_socio . " " . $socio->segundo_apellido_socio;

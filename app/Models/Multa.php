@@ -21,13 +21,25 @@ class Multa extends Model
     ];
 
     //Relacion propiedad <-> multas (Una multa puede pertenecer a muchas propiedades / Relacion muchos a muchos)
-    public function propiedades(){
-        return $this->belongsToMany(Propiedad::class,'propiedades_multas','infracion_id','propiedad_id')
-                    ->withPivot('fecha_multa','estado_pago')
-                    ->withTimestamps();
+    public function propiedades()
+    {
+        return $this->belongsToMany(Propiedad::class, 'propiedades_multas', 'infracion_id', 'propiedad_id')
+            ->withPivot('fecha_multa', 'estado_pago')
+            ->withTimestamps();
     }
 
-    public static function validar($data){
+
+    public static function multasPorPropiedad($id_propiedad)
+    {
+        return static::whereHas('propiedades', function ($query) use ($id_propiedad) {
+            $query->where('propiedad_id', $id_propiedad)
+                  ->where('estado_pago', true);
+        })->get();
+    }
+
+
+    public static function validar($data)
+    {
         $reglas = [
             'criterio_infraccion' => ['required', 'string'],
             'descripcion_infraccion' => ['required', 'string'],
@@ -38,9 +50,9 @@ class Multa extends Model
             'monto_infraccion.numeric' => 'Este campo debe ser un valor numerico'
         ];
 
-        $validacion =  Validator::make($data,$reglas,$message);
+        $validacion =  Validator::make($data, $reglas, $message);
 
-        if($validacion->fails()){
+        if ($validacion->fails()) {
             throw new ValidationException($validacion);
         }
         return true;
