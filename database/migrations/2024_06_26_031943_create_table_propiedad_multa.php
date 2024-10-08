@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->timestamp('fecha_multa')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->boolean('estado_pago')->default(false);
-            $table->unsignedBigInteger('propiedad_id');
+            $table->string('propiedad_id');
             $table->unsignedBigInteger('infracion_id');
 
             $table->foreign('propiedad_id')

@@ -32,9 +32,10 @@ class MedidorFactory extends Factory
 
         return [
             'propiedad_id_medidor' => $propiedad->id,
-            'id_medidor'=> $this->faker->numberBetween(10000-20000),
-            'medida_inicial' => $this->faker->numberBetween(0-1),
-            'ultima_medida' => $this->faker->numberBetween(2-100),
+            'id_medidor'=> $this->faker->unique()->numberBetween(1000,2000),
+            'medidor_nuevo'=> $this->faker->boolean(50),
+            'medida_inicial' => $this->faker->numberBetween(0,10),
+            'ultima_medida' => $this->faker->numberBetween(11,100),
         ];
     }
 }

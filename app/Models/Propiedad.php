@@ -9,12 +9,14 @@ class Propiedad extends Model
 {
     use HasFactory;
 
+    public $incrementing = false;
+    protected $keyType = 'string';
     protected $table = 'propiedades';
     protected $primaryKey = 'id';
 
     protected $fillable = [
         'socio_id',
-        'cuadra_propiedad',
+        'direccion_propiedad',
         'total_multas_propiedad',
         'descripcion_propiedad'
     ];

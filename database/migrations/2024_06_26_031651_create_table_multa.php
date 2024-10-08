@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('criterio_infraccion');
             $table->string('descripcion_infraccion');
+            $table->boolean('estado_activo')->default(true);
             $table->double('monto_infraccion');
             $table->timestamps();
         });

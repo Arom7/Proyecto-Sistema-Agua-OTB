@@ -13,6 +13,6 @@ class PropiedadMultaSeeder extends Seeder
      */
     public function run(): void
     {
-        PropiedadMulta::factory()->count(10)->create();
+        PropiedadMulta::factory()->count(30)->create();
     }
 }

@@ -31,7 +31,7 @@ class UsuarioFactory extends Factory
             'username' => $this->generateUniqueUsername(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'contrasenia' => Hash::make('password'),
+            'contrasenia' => Hash::make('admin123'),
             'remember_token' => Str::random(10),
         ];
     }
@@ -46,7 +46,7 @@ class UsuarioFactory extends Factory
         $username = Str::slug($this->faker->firstName . '.' . $this->faker->lastName);
 
         while (Usuario::where('username', $username)->exists()) {
-            $username = Str::slug($this->faker->firstName . '.' . $this->faker->lastName) . rand(1, 999);
+            $username = Str::slug($this->faker->firstName . '.' . $this->faker->lastName) . rand(1000, 9999);
         }
 
         return $username;

@@ -12,7 +12,7 @@ class Recibo extends Model
 {
     use HasFactory;
 
-    protected $table = 'recibos';
+    protected $table = 'preavisos';
     protected $primaryKey = 'id';
 
     protected $fillable = [

@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('consumos', function (Blueprint $table) {
             $table->id('id_consumo');
-            $table->integer('consumo_total');
             $table->date('mes_correspondiente');
             $table->integer('lectura_actual');
-            $table->unsignedBigInteger('propiedad_id_consumo');
+            $table->integer('consumo_total');
+            $table->string('propiedad_id_consumo');
             $table->timestamps();
 
             $table->foreign('propiedad_id_consumo')

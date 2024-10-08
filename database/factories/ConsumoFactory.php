@@ -24,7 +24,7 @@ class ConsumoFactory extends Factory
 
         return [
             'propiedad_id_consumo'=> $idMedidor,
-            'consumo_total' => $this->faker->numberBetween(10,100),
+            'consumo_total' => $this->faker->numberBetween(10,70),
             'lectura_actual' => $this->faker->numberBetween(100,200),
             'mes_correspondiente' => $this->faker->dateTimeThisDecade()->format('Y-m-01')
         ];

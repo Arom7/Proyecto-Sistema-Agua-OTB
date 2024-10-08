@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('medidores', function (Blueprint $table) {
-            $table->unsignedBigInteger('propiedad_id_medidor')->primary();
+            $table->string('propiedad_id_medidor')->primary();
             $table->integer('id_medidor')->unique();
+            $table->boolean('medidor_nuevo');
             $table->integer('medida_inicial');
             $table->integer('ultima_medida');
 

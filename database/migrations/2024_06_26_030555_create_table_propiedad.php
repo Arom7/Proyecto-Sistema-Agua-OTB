@@ -12,16 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('propiedades', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('socio_id');
-            $table->string('cuadra_propiedad');
+            $table->string('id')->primary();
+            $table->unsignedBigInteger('socio_id')->nullable();
+            $table->string('direccion_propiedad');
             $table->double('total_multas_propiedad');
             $table->string('descripcion_propiedad')->nullable();
             $table->timestamps();
 
             $table->foreign('socio_id')
                 ->references('id')->on('socios')
-                ->onDelete('cascade');
+                ->onDelete('set null');
         });
     }
 

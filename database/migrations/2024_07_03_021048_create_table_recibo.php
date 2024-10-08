@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('recibos', function (Blueprint $table) {
+        Schema::create('preavisos', function (Blueprint $table) {
             $table->id();
-            $table->boolean('estado_pago');
-            $table->double('total');
             $table->date('fecha_lectura');
+            $table->boolean('estado_pago')->default(false);
             $table->string('observaciones')->nullable();
+            $table->double('total');
             $table->unsignedBigInteger('id_consumo_recibo')->unique();
 
             $table->foreign('id_consumo_recibo')

@@ -18,11 +18,16 @@ class PropiedadMultaFactory extends Factory
      */
     public function definition(): array
     {
+        $propiedad = Propiedad::all()->random();
+        $multa = Multa::all()->random();
+
+        info('Propiedad ID: ' . $propiedad);
+        info('Infracción ID: ' . $multa->id);
+
         return [
-            'propiedad_id' => Propiedad::all()->random()->id,
-            'infracion_id' => Multa::all()->random()->id,
+            'propiedad_id' => $propiedad->id,
+            'infracion_id' => $multa->id,
             'fecha_multa' => $this->faker->dateTimeThisYear,
-            'estado_pago' => $this->faker->boolean,
         ];
     }
 }

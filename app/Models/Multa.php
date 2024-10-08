@@ -17,6 +17,7 @@ class Multa extends Model
     protected $fillable = [
         'criterio_infraccion',
         'descripcion_infraccion',
+        'estado_activo',
         'monto_infraccion'
     ];
 

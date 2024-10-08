@@ -9,14 +9,17 @@ class Medidor extends Model
 {
     use HasFactory;
 
+    public $incrementing = false;
+    protected $keyType = 'string';
     protected $table = 'medidores';
     protected $primaryKey = 'propiedad_id_medidor';
 
     protected $fillable= [
         'propiedad_id_medidor',
+        'id_medidor',
+        'medidor_nuevo',
         'medida_inicial',
-        'ultima_medida',
-        'propiedades'
+        'ultima_medida'
     ];
 
     // Relacion medidores <-- propiedades (Uno a muchos)
