@@ -259,7 +259,7 @@ class socioController extends Controller
         }
     }
 
-    public function socio_recibo($fecha_inicio , $fecha_fin){
+    public function socio_recibo($fecha_inicio , $fecha_fin, $pagoDeuda){
         try{
             $sociosRecibos = Socio::with('propiedades')->get();
 
@@ -268,7 +268,11 @@ class socioController extends Controller
                     $recibos = collect();
                     $consumos = Consumo::where('propiedad_id_consumo',$propiedad->id)->get();
                     foreach ($consumos as $consumo) {
-                        $recibosConsumo = Recibo::buscarRecibosFecha($consumo,$fecha_inicio,$fecha_fin);
+                        if($pagoDeuda != 1){
+                            $recibosConsumo = Recibo::buscarRecibosFecha($consumo,$fecha_inicio,$fecha_fin)->where('estado_pago',false);
+                        }else{
+                            $recibosConsumo = Recibo::buscarRecibosFecha($consumo,$fecha_inicio,$fecha_fin)->where('estado_pago',true);
+                        }
                         if(!$recibosConsumo->isEmpty()){
                             $recibos = $recibos->concat($recibosConsumo);
                         }

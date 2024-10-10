@@ -19,7 +19,8 @@ class MultaFactory extends Factory
         return [
             'criterio_infraccion'=>$this->faker->word,
             'descripcion_infraccion'=>$this->faker->sentence,
-            'monto_infraccion'=>$this->faker->randomFloat(2,1,100)
+            'monto_infraccion'=>$this->faker->randomFloat(2,1,100),
+            'estado_activo'=>$this->faker->boolean(50)
         ];
     }
 }

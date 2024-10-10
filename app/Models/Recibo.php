@@ -31,11 +31,11 @@ class Recibo extends Model
     //Validacion Recibo
     public static function validar($data){
         $reglas = [
-            'observaciones' => 'regex:/^[a-zA-Z0-9]+$/',
+            'observaciones' => 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9]+([ ,.\-]*[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9]*)*$/',
         ];
 
         $message = [
-            'observaciones.regex' => 'Solo puedes ingresar letras y numeros.'
+            'observaciones.regex' => 'Solo puedes ingresar letras, numeros y espacios.'
         ];
 
         $validacion =  Validator::make($data,$reglas,$message);

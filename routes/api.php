@@ -103,7 +103,7 @@ Route::put('/multas/{id}', [multasController::class , 'update']);
 Route::post('/propietario/multa', [multasController::class, 'enlazarMulta']);
 
 // Ruta para visualizar las recibos de un propietario
-Route::get('/socio/recibo/{fecha_inicio}/{fecha_fin}', [socioController::class, 'socio_recibo']);
+Route::get('/socio/deudas/pagos/{fecha_inicio}/{fecha_fin}/{id}', [socioController::class, 'socio_recibo']);
 
-
+// Ruta para la busqueda de un medidor por su numero de medidor
 Route::get('/busqueda-medidor/propiedades/{id}',[medidorController::class, 'show']);

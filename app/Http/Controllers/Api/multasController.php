@@ -111,6 +111,12 @@ class multasController extends Controller
             $multa->descripcion_infraccion = $request->descripcion_infraccion;
             $multa->monto_infraccion = $request->monto_infraccion;
 
+            if($multa->estado_activo && $request->estado_activo == false){
+                $multa->estado_activo = false;
+            }else{
+                $multa->estado_activo = true;
+            }
+
             $multa->save();
 
             return response()->json([

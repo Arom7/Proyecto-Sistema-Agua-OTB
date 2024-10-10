@@ -42,8 +42,8 @@ class Multa extends Model
     public static function validar($data)
     {
         $reglas = [
-            'criterio_infraccion' => ['required', 'string'],
-            'descripcion_infraccion' => ['required', 'string'],
+            'criterio_infraccion' => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9]+([ ,.\-]*[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9]*)*$/'],
+            'descripcion_infraccion' => ['required', 'string','regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9]+([ ,.\-]*[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9]*)*$/'],
             'monto_infraccion' => ['required', 'numeric'],
         ];
 
