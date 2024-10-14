@@ -8,8 +8,9 @@ use App\Http\Controllers\Api\reciboController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\socioController;
-use App\Http\Controllers\Api\UsuarioController;
-use App\Models\Usuario;
+use App\Http\Controllers\Api\MantenimientoController;
+use App\Http\Controllers\Api\AuthController;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,87 +24,99 @@ use App\Models\Usuario;
 */
 //Ruta para las funciones del usuario
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
-// Devuelve a los usuarios
-Route::get('/socios',[socioController::class, 'index']);
+// Registro usuarios, considerar que estos dos metodos ya no funcionan como tal, sustiutidos por login y register
 
-// Devuelve un solo usuario con su id
-Route::get('/socios/{id}',[socioController::class,'show']);
-
-// Modifican un recurso, el impacto es sobre la totalidad
-// de los atributos de recurso
-Route::put('/actualizar/socio/{id}',[socioController::class, 'update']);
-
-// Modifican sobre uno o varios de los atributos
-Route::patch('/actualizar/socio/{id}',[socioController::class, 'update_parcial']);
-
-// Eliminar al usuario
-Route::delete('/socios/{id}', [socioController::class, 'destroy']);
-// Ruta para visualizar las propiedades de un socio
-Route::get('/propiedades/socios', [socioController::class, 'propiedades']);
-
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/logout',[AuthController::class, 'logout']);
 
 /*
-  * Rutas para registrar nuevos socios y logueo de cuentas
+    * Rutas protegidas por sanctum para los socios y sus respectivos controles
 */
+Route::middleware('auth:sanctum')->group(function () {
+    // Devuelve solo una lista de los socios.
+    Route::get('/socios', [socioController::class, 'index']);
+    // Devuelve un solo usuario con su id
+    Route::get('/socios/{id}', [socioController::class, 'show']);
+    // Ruta para cerrar sesion
+    Route::post('/logout', [AuthController::class, 'logout']);
+    // Modifican todos los atributos del socio, actualizacion de perfil y datos del usuario
+    Route::put('/actualizar/socio/{id}', [socioController::class, 'update']);
+    // Modifican sobre uno o varios de los atributos del socio
+    Route::patch('/actualizar/socio/{id}', [socioController::class, 'update_parcial']);
+    // Eliminacion del socio
+    Route::delete('/socios/{id}', [socioController::class, 'destroy']);
+});
 
-// Registro usuarios
-Route::post('/registrar-socios',[socioController::class, 'store']);
+/* Se debe considerar este caso, tokens con capacidades*/
+//Route::middleware(['auth:sanctum', 'can:ver recibos'])
 
-Route::post('/ingreso-cuentas',[UsuarioController::class, 'store']);
+/*
+    * Rutas acceso recibos protegidas con sanctum
+*/
+Route::middleware('auth:sanctum')->group(function () {
+    //Ruta para la visualizacion de recibos de una persona, modificar luego
+    Route::get('/recibos', [reciboController::class, 'index']);
+    //Ruta para generar un nuevo recibo
+    Route::post('/recibos', [reciboController::class, 'store']);
+    //Ruta para visualizar un recibo
+    Route::get('/recibos/{id}', [reciboController::class, 'show']);
+    //Ruta para actualizar un recibo
+    Route::put('/actualizar-recibo/{id}', [reciboController::class, 'update']);
+});
+
+/*
+    * Rutas de acceso a las propiedades
+*/
+Route::middleware('auth:sanctum')->group(function () {
+    // Ruta para registrar propiedades a un usuario
+    Route::get('/registro-propiedades', [propiedadController::class, 'store']);
+    //Ruta para visualizar todas las propiedades de un socio en especifico
+    Route::get('/propiedades/socio/{id}', [propiedadController::class, 'show']);
+    // Ruta para visualizar las propiedades de un socio
+    Route::get('/propiedades/socios', [socioController::class, 'propiedades']);
+});
+
+/**
+ * Rutas multas protegidas con sanctum
+ */
+Route::middleware('auth:sanctum')->group(function () {
+    // Ruta para visualizar todas las multas
+    Route::get('/multas', [multasController::class, 'index']);
+    // Ruta para registrar una multa
+    Route::post('/multas', [multasController::class, 'store']);
+    // Ruta para actualizar una multa
+    Route::put('/multas/{id}', [multasController::class, 'update']);
+});
 
 
 /**
- * Rutas recibos
+ * Rutas de acceso a los mantenimientos
  */
-
-//Ruta para la visualizacion de recibos de una persona, modificar luego
-Route::get('/recibos', [reciboController::class , 'index']);
-
-//Ruta para generar un nuevo recibo
-Route::post('/recibos',[reciboController::class , 'store']);
-
-//Ruta para visualizar un recibo
-Route::get('/recibos/{id}', [reciboController::class , 'show']);
-
-//Ruta para actualizar un recibo
-Route::put('/actualizar-recibo/{id}', [reciboController::class, 'update']);
-
-
+Route::middleware('auth:sanctum')->group(function () {
+    // Ruta para visualizar todos los mantenimientos
+    Route::get('/lista/mantenimientos', [MantenimientoController::class, 'index']);
+    // Ruta para registrar un mantenimiento
+    Route::post('/mantenimientos', [MantenimientoController::class, 'store']);
+    // Ruta para visualizar un mantenimiento
+    Route::get('/mantenimientos/{id}', [MantenimientoController::class, 'show']);
+    // Ruta para actualizar un mantenimiento
+    Route::put('/mantenimientos/{id}', [MantenimientoController::class, 'update']);
+    // Ruta para eliminar un mantenimiento
+    Route::delete('/mantenimientos/{id}', [MantenimientoController::class, 'destroy']);
+});
 
 /**
- * Rutas propiedades
+ * Otras rutas protegidas por sanctum
  */
-
- // Ruta para registrar propiedades a un usuario
- Route::get('/registro-propiedades',[propiedadController::class , 'store']);
-// Ruta para visualizar todas las propiedades
-
-//Ruta para visualizar todas las propiedades de un socio en especifico
-Route::get('/propiedades/socio/{id}', [propiedadController::class, 'show']);
-
-/**
- * Rutas multas
- */
-
-// Ruta para visualizar todas las multas
-Route::get('/multas',[multasController::class , 'index']);
-
-// Ruta para registrar una multa
-Route::post('/multas', [multasController::class , 'store']);
-
-// Ruta para actualizar una multa
-Route::put('/multas/{id}', [multasController::class , 'update']);
+Route::middleware('auth:sanctum')->group(function () {
+    // Ruta para enlazar una multa a un propietario
+    Route::post('/propietario/multa', [multasController::class, 'enlazarMulta']);
+    // Ruta para visualizar las recibos de un propietario
+    Route::get('/socio/deudas/pagos/{fecha_inicio}/{fecha_fin}/{id}', [socioController::class, 'socio_recibo']);
+    // Ruta para la busqueda de un medidor por su numero de medidor
+    Route::get('/busqueda-medidor/propiedades/{id}', [medidorController::class, 'show']);
+});
 
 
-// Ruta para enlazar una multa a un propietario
-Route::post('/propietario/multa', [multasController::class, 'enlazarMulta']);
-
-// Ruta para visualizar las recibos de un propietario
-Route::get('/socio/deudas/pagos/{fecha_inicio}/{fecha_fin}/{id}', [socioController::class, 'socio_recibo']);
-
-// Ruta para la busqueda de un medidor por su numero de medidor
-Route::get('/busqueda-medidor/propiedades/{id}',[medidorController::class, 'show']);

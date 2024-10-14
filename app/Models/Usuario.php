@@ -31,7 +31,6 @@ class Usuario extends Authenticatable
 
     ];
 
-
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -51,6 +50,16 @@ class Usuario extends Authenticatable
         'email_verified_at' => 'datetime',
         'contrasenia' => 'hashed',
     ];
+
+    public function getAuthPassword()
+    {
+        return $this->contrasenia;
+    }
+
+    public function getAuthIdentifierName()
+    {
+        return 'username';
+    }
 
     public function socio(){
         return $this->belongsTo(Socio::class,'socio_id_usuario','id');

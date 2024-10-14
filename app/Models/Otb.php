@@ -23,4 +23,9 @@ class Otb extends Model
         //Otb esta relacionado uno a muchos con socios, llave foranea de Socio, llave primaria de Otb
         return $this->hasMany(Socio::class,'otb_id','id');
     }
+
+    public function mantenimientos() {
+        // Una OTb tiene muchos mantenimientos de equipos
+        return $this->hasMany(Mantenimiento::class,'otb_id','id');
+    }
 }

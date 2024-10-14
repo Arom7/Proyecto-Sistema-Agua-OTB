@@ -62,8 +62,8 @@ class Socio extends Model
     public static function validar($data){
         $reglas = [
             'nombre_socio' => ['required', 'string', 'regex:/^(?! )[a-zA-Z]+( [a-zA-Z]+)*$/', 'max:85'],
-            'primer_apellido_socio' => ['required', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
-            'segundo_apellido_socio' => ['nullable', 'string', 'regex:/^[a-zA-Z]+$/', 'max:85'],
+            'primer_apellido_socio' => ['required', 'string', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+$/', 'max:85'],
+            'segundo_apellido_socio' => ['nullable', 'string', 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+$', 'max:85'],
             'ci_socio' => ['required', 'string', 'regex:/^[a-zA-Z0-9]+$/', 'max:40','unique:socios,ci_socio'],
         ];
 

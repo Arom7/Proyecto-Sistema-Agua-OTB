@@ -31,7 +31,8 @@ class DatabaseSeeder extends Seeder
             PropiedadMultaSeeder::class,
             MedidorSeeder::class,
             ConsumoSeeder::class,
-            ReciboSeeder::class
+            ReciboSeeder::class,
+            MantenimientoSeeder::class
         ]);
     }
 }
