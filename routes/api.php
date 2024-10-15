@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\socioController;
 use App\Http\Controllers\Api\MantenimientoController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ConsumoController;
+use App\Models\Consumo;
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -71,7 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
 */
 Route::middleware('auth:sanctum')->group(function () {
     // Ruta para registrar propiedades a un usuario
-    Route::get('/registro-propiedades', [propiedadController::class, 'store']);
+    Route::post('/registro-propiedades', [propiedadController::class, 'store']);
     //Ruta para visualizar todas las propiedades de un socio en especifico
     Route::get('/propiedades/socio/{id}', [propiedadController::class, 'show']);
     // Ruta para visualizar las propiedades de un socio
@@ -119,4 +121,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/busqueda-medidor/propiedades/{id}', [medidorController::class, 'show']);
 });
 
-
+Route::get('/endeudados/recibos/{id}', [ConsumoController::class, 'endeudados']);

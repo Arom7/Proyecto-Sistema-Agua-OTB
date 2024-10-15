@@ -4,7 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 class Medidor extends Model
 {
     use HasFactory;
@@ -49,5 +50,22 @@ class Medidor extends Model
         return static ::where('id_medidor' , $id_medidor)
                       ->with('propiedad', 'propiedad.socio')
                       ->first();
+    }
+
+    public static function validar($data){
+        $reglas = [
+            'id_medidor' => ['required', 'unique:medidores'],
+            'lectura' => ['integer'],
+        ];
+
+        $messages = [
+            'id_medidor.required' => 'El campo codigo de medidor es requerido'
+        ];
+
+        $validator = Validator::make($data, $reglas, $messages);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
     }
 }

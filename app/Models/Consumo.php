@@ -22,23 +22,37 @@ class Consumo extends Model
     ];
 
     // Relacion Consumo -- Medidor (Un consumo corresponde a un medidor)
-    public function  medidor() {
-        return $this->belongsTo(Medidor::class , 'propiedad_id_consumo', 'propiedad_id_medidor');
+    public function  medidor()
+    {
+        return $this->belongsTo(Medidor::class, 'propiedad_id_consumo', 'propiedad_id_medidor');
     }
 
-    public function recibos(){
-        return $this-> hasOne(Recibo::class, 'id_consumo_recibo' , 'propiedad_id_consumo');
+    public function recibos()
+    {
+        return $this->hasOne(Recibo::class, 'id_consumo_recibo', 'id_consumo');
     }
 
-    public static function buscarConsumo($id_consumo_recibo){
+    public static function buscarConsumo($id_consumo_recibo)
+    {
         return static::where('id_consumo', $id_consumo_recibo)
-                     ->first();
+            ->first();
+    }
+
+    public static function busquedaConsumoPropiedad($propiedad_id_consumo)
+    {
+        return static::where('propiedad_id_consumo', $propiedad_id_consumo)
+            ->whereHas('recibos', function ($query) {
+                $query->where('estado_pago', false);
+            })
+            ->with('recibos')
+            ->get();
     }
 
     // Funcion validacion de datos consumo
-    public static function validar($data){
+    public static function validar($data)
+    {
         $reglas = [
-            'lectura_actual'=> ['required', 'integer'],
+            'lectura_actual' => ['required', 'integer'],
         ];
 
         $messages = [
@@ -46,11 +60,11 @@ class Consumo extends Model
             'mes_correspondiente.date' => 'El campo debe ser un una fecha'
         ];
 
-        $validacion = Validator::make($data,$reglas,$messages);
+        $validacion = Validator::make($data, $reglas, $messages);
 
-        if($validacion->fails()){
+        if ($validacion->fails()) {
             throw new ValidationException($validacion);
         }
         return true;
     }
- }
+}
