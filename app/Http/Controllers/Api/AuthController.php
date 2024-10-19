@@ -12,16 +12,23 @@ use App\Models\Socio;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Laravel\Sanctum\HasApiTokens;
 
 class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $user = Usuario::where('username', $request->username)->first();
-        if ($user && Hash::check($request->contrasenia, $user->contrasenia)) {
-            $token = $user->createToken('api-token')->plainTextToken;
+        $request->validate([
+            'login' => 'required|string',
+            'contrasenia' => 'required|string'
+        ]);
+
+        $loginType = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        if (Auth::attempt([$loginType => $request->login, 'password' => $request->contrasenia])) {
+            $user = Auth::user();
             return response()->json([
-                'token' => $token,
+                'token' => $user->createToken('api-token')->plainTextToken,
                 'message' => 'Usuario logueado satisfactoriamente',
                 'status' => true
             ], 200);

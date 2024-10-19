@@ -158,7 +158,7 @@ class reciboController extends Controller
             }
 
             return response()->json([
-                'usuario' => $recibo,
+                'preaviso' => $recibo,
                 'status' => 200
             ],200);
         }catch (ModelNotFoundException $e) {
@@ -246,6 +246,29 @@ class reciboController extends Controller
         }
     }
 
+    public function update_estado($id) {
+        try {
+            $recibo = Recibo::find($id);
+
+            if (!$recibo) {
+                throw new ModelNotFoundException('Recibo no encontrado');
+            }
+
+            $recibo->estado_pago = true;
+            $recibo->save();
+
+            return response()->json([
+                'message' => 'Recibo actualizado, estado de pago.',
+                'status' => 200
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 404,
+            ], 404);
+        }
+    }
+
     /**
      * Remove the specified resource from storage. //se debe eliminar recibos??
      */
@@ -269,6 +292,40 @@ class reciboController extends Controller
                 'message' => $e->getMessage(),
                 'status' => 404,
             ], 404);
+        }
+    }
+
+    public function cantidadRecibosPagados() {
+        try{
+            $cantidadRecibosPagados = Recibo::where('estado_pago', true)->count();
+
+            return response()->json([
+                'status' => true,
+                'cantidadRecibosPagados' => $cantidadRecibosPagados
+            ],200);
+        }catch (\Exception $e){
+            $data = [
+                'message' => 'Error al obtener los recibos pagados: '.$e->getMessage(),
+                'status' => 500
+            ];
+            return response($data, 500);
+        }
+    }
+
+    public function cantidadRecibosPendientes() {
+        try{
+            $cantidadRecibosPagados = Recibo::where('estado_pago', false)->count();
+
+            return response()->json([
+                'status' => true,
+                'cantidadRecibosPendientes' => $cantidadRecibosPagados
+            ],200);
+        }catch (\Exception $e){
+            $data = [
+                'message' => 'Error al obtener los recibos pagados: '.$e->getMessage(),
+                'status' => 500
+            ];
+            return response($data, 500);
         }
     }
 }

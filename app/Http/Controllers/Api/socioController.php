@@ -300,4 +300,21 @@ class socioController extends Controller
             ], 404);
         }
     }
+
+    public function cantidadSocios(){
+        try{
+            $cantidadSocios = Socio::all()->count();
+
+            return response()->json([
+                'status' => true,
+                'cantidadSocios' => $cantidadSocios
+            ],200);
+        }catch (\Exception $e){
+            $data = [
+                'message' => 'Error al obtener los socios: '.$e->getMessage(),
+                'status' => 500
+            ];
+            return response($data, 500);
+        }
+    }
 }

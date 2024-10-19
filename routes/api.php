@@ -5,7 +5,8 @@ use App\Http\Controllers\Api\medidorController;
 use App\Http\Controllers\Api\multasController;
 use App\Http\Controllers\Api\propiedadController;
 use App\Http\Controllers\Api\reciboController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\Auth\ForgotPasswordController;
+use App\Http\Controllers\Api\Auth\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\socioController;
 use App\Http\Controllers\Api\MantenimientoController;
@@ -29,10 +30,11 @@ use Illuminate\Support\Facades\Auth;
 
 // Registro usuarios, considerar que estos dos metodos ya no funcionan como tal, sustiutidos por login y register
 
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login/socio', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout',[AuthController::class, 'logout']);
-
+Route::post('/reseteo/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::post('/reseteo', [ResetPasswordController::class, 'reset'])->name('password.reset');
 /*
     * Rutas protegidas por sanctum para los socios y sus respectivos controles
 */
@@ -57,7 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
 /*
     * Rutas acceso recibos protegidas con sanctum
 */
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'role:administrador'])->group(function () {
     //Ruta para la visualizacion de recibos de una persona, modificar luego
     Route::get('/recibos', [reciboController::class, 'index']);
     //Ruta para generar un nuevo recibo
@@ -122,3 +124,15 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::get('/endeudados/recibos/{id}', [ConsumoController::class, 'endeudados']);
+
+Route::patch('/recibo/estado/pago/{id}' ,[reciboController::class, 'update_estado']);
+Route::get('/recibo/{id}', [reciboController::class, 'show']);
+
+
+Route::get('/cantidad/socios', [socioController::class, 'cantidadSocios']);
+
+Route::get('/cantidad/propiedades', [propiedadController::class, 'cantidadPropiedades']);
+
+Route::get('/cantidad/recibos/pagados', [reciboController::class, 'cantidadRecibosPagados']);
+
+Route::get('/cantidad/recibos/pendientes', [reciboController::class, 'cantidadRecibosPendientes']);

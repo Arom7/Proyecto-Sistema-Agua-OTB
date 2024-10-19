@@ -22,7 +22,7 @@ class propiedadController extends Controller
     /**
      * Lista de propiedades
      */
-    public function propiedadeSocio(Request $request){
+    public function recibosPropiedad($id){
 
     }
 
@@ -122,6 +122,23 @@ class propiedadController extends Controller
                 'status' => 500
             ];
             return response()->json($data, 500);
+        }
+    }
+
+    public function cantidadPropiedades(){
+        try{
+            $cantidadPropiedades = Propiedad::all()->count();
+
+            return response()->json([
+                'status' => true,
+                'cantidadPropiedades' => $cantidadPropiedades
+            ],200);
+        }catch (\Exception $e){
+            $data = [
+                'message' => 'Error al obtener las propiedades: '.$e->getMessage(),
+                'status' => 500
+            ];
+            return response($data, 500);
         }
     }
 
