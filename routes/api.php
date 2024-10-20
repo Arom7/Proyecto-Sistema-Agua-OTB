@@ -85,14 +85,14 @@ Route::middleware('auth:sanctum')->group(function () {
 /**
  * Rutas multas protegidas con sanctum
  */
-Route::middleware('auth:sanctum')->group(function () {
+//Route::middleware('auth:sanctum')->group(function () {
     // Ruta para visualizar todas las multas
     Route::get('/multas', [multasController::class, 'index']);
     // Ruta para registrar una multa
     Route::post('/multas', [multasController::class, 'store']);
     // Ruta para actualizar una multa
     Route::put('/multas/{id}', [multasController::class, 'update']);
-});
+//});
 
 
 /**

@@ -11,13 +11,15 @@ class ResetPasswordNotification extends Notification
 {
     use Queueable;
     public $token;
+    public $email;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($token)
+    public function __construct($token,$email)
     {
         $this->token = $token;
+        $this->email = $email;
     }
 
     /**
@@ -35,10 +37,7 @@ class ResetPasswordNotification extends Notification
      */
     public function toMail($notifiable)
     {
-        $url = url(route('password.reset', [
-            'token' => $this->token,
-            'email' => $notifiable->getEmailForPasswordReset(),
-        ], false));
+        $url = url('http://localhost:5173/auth/reseteo/password?token=' . $this->token . '&email=' . $this->email);
 
         return (new MailMessage)
             ->greeting('Hola!')
