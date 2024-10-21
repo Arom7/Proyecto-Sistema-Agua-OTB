@@ -38,7 +38,7 @@ class propiedadController extends Controller
             if(Propiedad::find($request->id)){
                 $data = [
                     'message' => 'La propiedad ya se encuentra registrada',
-                    'status' => 400
+                    'status' => false
                 ];
                 return response()->json($data, 200);
             }
@@ -105,7 +105,7 @@ class propiedadController extends Controller
             if ($lista_propiedades->isEmpty()) {
                 $data = [
                     'message' => 'No se tiene propiedades registradas de este socio',
-                    'status' => 400
+                    'status' => false
                 ];
                 return response()->json($data, 200);
             }

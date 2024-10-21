@@ -31,8 +31,7 @@ use Illuminate\Support\Facades\Auth;
 // Registro usuarios, considerar que estos dos metodos ya no funcionan como tal, sustiutidos por login y register
 
 Route::post('/login/socio', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/logout',[AuthController::class, 'logout']);
+Route::post('/logout', [AuthController::class, 'logout']);
 Route::post('/reseteo/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::post('/reseteo', [ResetPasswordController::class, 'reset'])->name('password.reset');
 /*
@@ -51,6 +50,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/actualizar/socio/{id}', [socioController::class, 'update_parcial']);
     // Eliminacion del socio
     Route::delete('/socios/{id}', [socioController::class, 'destroy']);
+    // Ruta para registrar un nuevo socio
+    Route::post('/registro/socio', [AuthController::class, 'register']);
 });
 
 /* Se debe considerar este caso, tokens con capacidades*/
@@ -85,14 +86,14 @@ Route::middleware('auth:sanctum')->group(function () {
 /**
  * Rutas multas protegidas con sanctum
  */
-//Route::middleware('auth:sanctum')->group(function () {
-    // Ruta para visualizar todas las multas
-    Route::get('/multas', [multasController::class, 'index']);
-    // Ruta para registrar una multa
-    Route::post('/multas', [multasController::class, 'store']);
-    // Ruta para actualizar una multa
-    Route::put('/multas/{id}', [multasController::class, 'update']);
-//});
+Route::middleware('auth:sanctum')->group(function () {
+// Ruta para visualizar todas las multas
+Route::get('/multas', [multasController::class, 'index']);
+// Ruta para registrar una multa
+Route::post('/multas', [multasController::class, 'store']);
+// Ruta para actualizar una multa
+Route::put('/multas/{id}', [multasController::class, 'update']);
+});
 
 
 /**
@@ -125,14 +126,19 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::get('/endeudados/recibos/{id}', [ConsumoController::class, 'endeudados']);
 
-Route::patch('/recibo/estado/pago/{id}' ,[reciboController::class, 'update_estado']);
+Route::patch('/recibo/estado/pago/{id}', [reciboController::class, 'update_estado']);
 Route::get('/recibo/{id}', [reciboController::class, 'show']);
 
-
-Route::get('/cantidad/socios', [socioController::class, 'cantidadSocios']);
-
-Route::get('/cantidad/propiedades', [propiedadController::class, 'cantidadPropiedades']);
-
-Route::get('/cantidad/recibos/pagados', [reciboController::class, 'cantidadRecibosPagados']);
-
-Route::get('/cantidad/recibos/pendientes', [reciboController::class, 'cantidadRecibosPendientes']);
+/**
+ * Otras rutas protegidas por sanctum
+ */
+Route::middleware('auth:sanctum')->group(function () {
+    // Ruta para consulta de cantidad socios
+    Route::get('/cantidad/socios', [socioController::class, 'cantidadSocios']);
+    // Ruta para consulta de cantidad propiedades
+    Route::get('/cantidad/propiedades', [propiedadController::class, 'cantidadPropiedades']);
+    // Ruta para consulta de cantidad recibos pagados global
+    Route::get('/cantidad/recibos/pagados', [reciboController::class, 'cantidadRecibosPagados']);
+    // Ruta para consulta de cantidad recibos pendientes global
+    Route::get('/cantidad/recibos/pendientes', [reciboController::class, 'cantidadRecibosPendientes']);
+});

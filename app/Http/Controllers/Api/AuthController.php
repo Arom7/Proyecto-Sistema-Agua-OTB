@@ -41,16 +41,12 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        Log::info('Ingreso al metodo');
-
         Socio::validar($request->all());
         Usuario::validar($request->all());
 
         DB::beginTransaction();
         try {
-            $esta_registrado = Socio::usuarioExistente($request->ci_socio);
-
-            if ($esta_registrado) {
+            if (Socio::where('ci_socio', $request->ci_socio)->exists()) {
                 return response()->json(['error' => 'El socio ya se encuentra registrado.'], 400);
             }
 
@@ -62,8 +58,6 @@ class AuthController extends Controller
                 'otb_id' => 1
             ]);
 
-            Log::info('socio registrado : ', ['socio' => $socio]);
-
             $usuario = Usuario::create([
                 'username' => Usuario::generarUsername($socio),
                 'email' => $request->email,
@@ -71,19 +65,18 @@ class AuthController extends Controller
                 'socio_id_usuario' => $socio->id
             ]);
 
-            Log::info('usuario registro : ', ['usuario' => $usuario]);
-
-            $token = $usuario->createToken('api-token')->plainTextToken;
-
             DB::commit();
             return response()->json([
                 'status' => true,
-                'token' => $token,
                 'usuario' => $usuario
             ], 200);
         } catch (\Throwable $e) {
             DB::rollback();
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json([
+                'errores' => $e->getMessage(),
+                'message' => 'Error al registrar el usuario.',
+                'status' => false
+            ], 500);
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Datos invalidados.',
