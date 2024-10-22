@@ -60,7 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
 /*
     * Rutas acceso recibos protegidas con sanctum
 */
-Route::middleware(['auth:sanctum', 'role:administrador'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:administrador|lecturador'])->group(function () {
     //Ruta para la visualizacion de recibos de una persona, modificar luego
     Route::get('/recibos', [reciboController::class, 'index']);
     //Ruta para generar un nuevo recibo
@@ -127,6 +127,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/endeudados/recibos/{id}', [ConsumoController::class, 'endeudados']);
 
 Route::patch('/recibo/estado/pago/{id}', [reciboController::class, 'update_estado']);
+
 Route::get('/recibo/{id}', [reciboController::class, 'show']);
 
 /**

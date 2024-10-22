@@ -13,6 +13,7 @@ use Illuminate\Auth\Events\Logout;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
@@ -27,8 +28,11 @@ class AuthController extends Controller
 
         if (Auth::attempt([$loginType => $request->login, 'password' => $request->contrasenia])) {
             $user = Auth::user();
+            $roles = $user->getRoleNames();
+
             return response()->json([
                 'token' => $user->createToken('api-token')->plainTextToken,
+                'roles' => $roles,
                 'message' => 'Usuario logueado satisfactoriamente',
                 'status' => true
             ], 200);
