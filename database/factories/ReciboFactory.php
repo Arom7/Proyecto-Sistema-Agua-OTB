@@ -33,7 +33,9 @@ class ReciboFactory extends Factory
             'total' => $this->faker->randomFloat(1, 10, 50),
             'fecha_lectura' => $this->faker->dateTimeBetween('-1 year', 'now'),
             'observaciones' => $this->faker->sentence,
-            'id_consumo_recibo' => $idConsumo
+            'id_consumo_recibo' => $idConsumo,
+            'lectura_anterior_correspondiente' => $this->faker->numberBetween(1, 100),
+            'lectura_actual_correspondiente' => $this->faker->numberBetween(1, 100),
         ];
     }
 }

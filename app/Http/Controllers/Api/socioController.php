@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class socioController extends Controller
 {
@@ -269,9 +270,19 @@ class socioController extends Controller
                     $consumos = Consumo::where('propiedad_id_consumo',$propiedad->id)->get();
                     foreach ($consumos as $consumo) {
                         if($pagoDeuda != 1){
+                            Log::info('Visualizar consumo' . $consumo);
                             $recibosConsumo = Recibo::buscarRecibosFecha($consumo,$fecha_inicio,$fecha_fin)->where('estado_pago',false);
+                            foreach ($recibosConsumo as $recibo) {
+                                $recibo->mes = $consumo->mes_correspondiente;
+                                $recibo->consumo = $consumo->consumo_total;
+                            }
+                            Log::info('Recibos:' . $recibosConsumo);
                         }else{
                             $recibosConsumo = Recibo::buscarRecibosFecha($consumo,$fecha_inicio,$fecha_fin)->where('estado_pago',true);
+                            foreach ($recibosConsumo as $recibo) {
+                                $recibo->mes = $consumo->mes_correspondiente;
+                                $recibo->consumo = $consumo->consumo_total;
+                            }
                         }
                         if(!$recibosConsumo->isEmpty()){
                             $recibos = $recibos->concat($recibosConsumo);

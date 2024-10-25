@@ -48,16 +48,32 @@ class Consumo extends Model
             ->get();
     }
 
+    public static function busquedaConsumoPropiedadReciente($propiedad_id_consumo)
+    {
+        return static::where('propiedad_id_consumo', $propiedad_id_consumo)
+            ->whereHas('recibos', function ($query) {
+                $query->where('estado_pago', false);
+            })
+            ->orderBy('id_consumo', 'desc')
+            ->with('recibos')
+            ->first();
+    }
+
+    public static function busquedaConsumoPorRecibo($id_consumo){
+        return static::where('id_consumo', $id_consumo)
+            ->select('mes_correspondiente','consumo_total')
+            ->first();
+    }
+
     // Funcion validacion de datos consumo
     public static function validar($data)
     {
         $reglas = [
-            'lectura_actual' => ['required', 'integer'],
+            'lectura_actual' => ['required', 'integer']
         ];
 
         $messages = [
-            'lectura_actual.integer' => 'El campo debe ser un numero entero',
-            'mes_correspondiente.date' => 'El campo debe ser un una fecha'
+            'lectura_actual.integer' => 'El campo debe ser un numero entero'
         ];
 
         $validacion = Validator::make($data, $reglas, $messages);

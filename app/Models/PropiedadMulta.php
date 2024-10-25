@@ -14,6 +14,7 @@ class PropiedadMulta extends Model
     protected $fillable = [
         'fecha_multa',
         'estado_pago',
+        'mes_multa',
         'propiedad_id',
         'infraccion_id'
     ];
@@ -26,5 +27,11 @@ class PropiedadMulta extends Model
     //Relacion PropiedadMulta <- Multa
     public function multa(){
         return $this->belongsTo(Multa::class,'infraccion_id','id');
+    }
+
+    public static function busquedaMes($mes, $id_propiedad){
+        return static:: where('mes_multa',$mes)
+            ->where('propiedad_id',$id_propiedad)
+            ->get();
     }
 }

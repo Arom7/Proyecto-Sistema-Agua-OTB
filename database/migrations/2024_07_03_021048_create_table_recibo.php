@@ -16,6 +16,8 @@ return new class extends Migration
             $table->date('fecha_lectura');
             $table->boolean('estado_pago')->default(false);
             $table->string('observaciones')->nullable();
+            $table->integer('lectura_actual_correspondiente');
+            $table->integer('lectura_anterior_correspondiente');
             $table->double('total');
             $table->unsignedBigInteger('id_consumo_recibo')->unique();
 

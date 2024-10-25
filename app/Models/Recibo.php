@@ -20,7 +20,9 @@ class Recibo extends Model
         'fecha_lectura',
         'observaciones',
         'estado_pago',
-        'id_consumo_recibo'
+        'id_consumo_recibo',
+        'lectura_actual_correspondiente',
+        'lectura_anterior_correspondiente'
     ];
 
     // Relacion recibo -- consumo (Relacion uno a uno)
@@ -31,7 +33,7 @@ class Recibo extends Model
     //Validacion Recibo
     public static function validar($data){
         $reglas = [
-            'observaciones' => 'regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9]+([ ,.\-]*[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9]*)*$/',
+            'observaciones' => ['nullable','regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9]+([ ,.\-]*[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9]*)*$/'],
         ];
 
         $message = [

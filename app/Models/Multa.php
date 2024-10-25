@@ -30,11 +30,12 @@ class Multa extends Model
     }
 
 
-    public static function multasPorPropiedad($id_propiedad)
+    public static function multasPorPropiedad($id_propiedad, $mes)
     {
-        return static::whereHas('propiedades', function ($query) use ($id_propiedad) {
+        return static::whereHas('propiedades', function ($query) use ($id_propiedad, $mes) {
             $query->where('propiedad_id', $id_propiedad)
-                  ->where('estado_pago', true);
+                  ->where('mes_multa', $mes)
+                  ->where('estado_pago', false);
         })->get();
     }
 

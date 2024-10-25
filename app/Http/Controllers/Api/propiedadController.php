@@ -8,6 +8,7 @@ use App\Models\Medidor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class propiedadController extends Controller
 {
@@ -18,14 +19,6 @@ class propiedadController extends Controller
     {
         //
     }
-
-    /**
-     * Lista de propiedades
-     */
-    public function recibosPropiedad($id){
-
-    }
-
 
     /**
      * Store a newly created resource in storage.
@@ -145,9 +138,37 @@ class propiedadController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function updatePropietario(Request $request, string $id)
     {
-        //
+        try{
+            $request -> validate([
+                'nuevo_propietario_id' => 'required|exists:socios,id'
+            ]);
+
+            $propiedad = Propiedad::findOrFail($id);
+
+            $propiedad->socio_id = $request->nuevo_propietario_id;
+
+            $propiedad->save();
+
+            return response()->json([
+                'message' => 'Propietario actualizado correctamente',
+                'propiedad' => $propiedad,
+                'status' => true
+            ]);
+
+        }catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Propiedad no encontrada',
+                'status' => false
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Ocurrió un error al actualizar el propietario',
+                'details' => $e->getMessage(),
+                'status' => false
+            ], 500);
+        }
     }
 
     /**

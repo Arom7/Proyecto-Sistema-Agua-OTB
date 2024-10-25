@@ -14,6 +14,14 @@ class SocioSeeder extends Seeder
      */
     public function run(): void
     {
+        Socio::create([
+            'nombre_socio' => 'Alan',
+            'primer_apellido_socio' => 'Mora',
+            'segundo_apellido_socio' => 'Vargas',
+            'ci_socio' => '13355063',
+            'otb_id' => 1,
+        ]);
+
         Socio::factory()->count(10)->create();
     }
 }

@@ -13,6 +13,13 @@ class UsuarioSeeder extends Seeder
      */
     public function run(): void
     {
-        Usuario::factory()->count(25)->create();
+        Usuario::create([
+            'username' => 'admin',
+            'email' => 'alancitomora1999@gmail.com',
+            'contrasenia' => bcrypt('admin'),
+            'socio_id_usuario' => 1,
+        ]);
+
+        Usuario::factory()->count(12)->create();
     }
 }

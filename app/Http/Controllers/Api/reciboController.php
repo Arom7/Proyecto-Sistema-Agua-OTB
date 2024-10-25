@@ -9,11 +9,14 @@ use App\Models\Socio;
 use App\Models\Medidor;
 use App\Models\Consumo;
 use App\Models\Multa;
+use App\Models\PropiedadMulta;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
 class reciboController extends Controller
 {
     /**
@@ -38,7 +41,8 @@ class reciboController extends Controller
                 $id_propiedad = $consumo->propiedad_id_consumo;
                 $recibo->codigo_propiedad = $id_propiedad;
                 $propiedad = Propiedad::find($id_propiedad);
-                $recibo->multa_propiedad = Multa::multasPorPropiedad($id_propiedad);
+                $recibo->multa_propiedad = Multa::multasPorPropiedad($id_propiedad,$consumo->mes_correspondiente);
+                $recibo->mes_correspondiente = $consumo->mes_correspondiente;
                 $id_socio = $propiedad->socio_id;
                 $socio = Socio::find($id_socio);
                 $nombre_completo = $socio->nombre_socio . " " . $socio->primer_apellido_socio . " " . $socio->segundo_apellido_socio;
@@ -73,22 +77,10 @@ class reciboController extends Controller
             Consumo::validar($request->all());
             Recibo::validar($request->all());
 
-            $id_socio = Socio::find($request -> id_socio);
-
-            if (!$id_socio) {
-                throw new ModelNotFoundException('Socio no encontrado');
-            }
-
-            $propiedad = Propiedad::buscar_id_propiedad($id_socio->id, $request->codigo_propiedad);
-
-            if (!$propiedad) {
-                throw new ModelNotFoundException('Propiedad no encontrada');
-            }
-
-            $medidor = Medidor::busquedaMedidor($propiedad->id);
+            $medidor = Medidor::busquedaMedidor($request->codigo_propiedad);
 
             if (!$medidor) {
-                throw new ModelNotFoundException('Medidor no encontrado');
+                throw new ModelNotFoundException('Medidor o propiedad no registrados');
             }
 
             $medidor->medida_inicial = $medidor->ultima_medida;
@@ -96,18 +88,22 @@ class reciboController extends Controller
             $medidor->save();
 
             $consumo = Consumo::create([
-                'mes_correspondiente' => Carbon::now()->subMonth()->day(20),
+                'mes_correspondiente' => Carbon::now()->subMonth()->day(1),
                 'lectura_actual' => $request->lectura_actual,
                 'consumo_total' => $request->lectura_actual - $medidor->medida_inicial,
-                'propiedad_id_consumo' => $propiedad->id
+                'propiedad_id_consumo' => $request->codigo_propiedad
             ]);
 
             $consumo->save();
+
+            Log::info('Lectura anterior: '. $medidor->medida_inicial);
 
             $recibo = Recibo::create([
                 'estado_pago' => false,
                 'total' => Recibo::calcularTotal($consumo->consumo_total),
                 'fecha_lectura' => Carbon::now(),
+                'lectura_actual_correspondiente'=> $request->lectura_actual,
+                'lectura_anterior_correspondiente' => $medidor->medida_inicial,
                 'id_consumo_recibo' => $consumo->id_consumo,
                 'observaciones' => $request->observaciones
             ]);
@@ -174,12 +170,15 @@ class reciboController extends Controller
      */
     public function update(Request $request, string $id)
     {
-
         try{
             $recibo = Recibo::find($id);
 
             if(!$recibo){
                 throw new ModelNotFoundException('Recibo no encontrado');
+            }
+
+            if($recibo->estado_pago){
+                throw new \Exception("El recibo ya fue pagado, no se puede editar", 400);
             }
 
             Recibo::validar($request->all());
@@ -194,7 +193,19 @@ class reciboController extends Controller
                 throw new ModelNotFoundException('Error en la busqueda del consumo de la propiedad');
             }
 
-            $consumo->lectura_actual = $request->lectura_actual ;
+            $consumo->lectura_actual = $request->lectura_actual;
+
+            $multa = PropiedadMulta::busquedaMes($consumo->mes_correspondiente, $consumo->propiedad_id_consumo);
+            Log::info('Multas encontradas: '. $multa);
+            $subtototal_multas = 0;
+            foreach($multa as $multa){
+                $multa->mes_multa = $request->mes_correspondiente;
+                $multa->save();
+                $infraccion = Multa::find($multa->infracion_id);
+                Log::info('Infraccion encontrada: '. $infraccion ->monto_infraccion);
+                $subtototal_multas += $infraccion->monto_infraccion;
+            }
+
             $consumo->mes_correspondiente = $request->mes_correspondiente;
 
             $medidor = Medidor::find($consumo->propiedad_id_consumo);
@@ -210,6 +221,8 @@ class reciboController extends Controller
             }
 
             $recibo->total = Recibo::calcularTotal($consumo->consumo_total);
+            $recibo->total += $subtototal_multas;
+            $recibo->lectura_actual_correspondiente = $request->lectura_actual;
 
             $medidor->save();
             $consumo->save();

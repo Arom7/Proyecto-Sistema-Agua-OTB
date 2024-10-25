@@ -13,9 +13,10 @@ class RoleUsuarioSeeder extends Seeder
      */
     public function run(): void
     {
-        $usuario = Usuario::find('aaliyahryan');
+        $usuario = Usuario::find('admin');
         $usuario->assignRole('administrador');
 
+        /*
         $usuario = Usuario::find('adityatorp');
         $usuario->assignRole('lecturador');
 
@@ -24,5 +25,6 @@ class RoleUsuarioSeeder extends Seeder
 
         $usuario = Usuario::find('bethelrutherford');
         $usuario->assignRole('mantenimiento');
+        */
     }
 }

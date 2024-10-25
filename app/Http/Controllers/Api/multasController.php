@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Consumo;
 use App\Models\Multa;
 use App\Models\Propiedad;
+use App\Models\Recibo;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -169,16 +172,24 @@ class multasController extends Controller
                 throw new ModelNotFoundException('Propiedad no encontrada');
             }
 
+            $consumo = Consumo::busquedaConsumoPropiedadReciente($propiedad->id);
+            $recibo = $consumo -> recibos;
+
+            $recibo->total += $multa->monto_infraccion;
+
+            $recibo->save();
+
             $propiedad->multas()->attach($multa->id,[
                 'fecha_multa' => Carbon::now(),
-                'estado_pago' => false
+                'estado_pago' => false,
+                'mes_multa' => $consumo->mes_correspondiente,
             ]);
+
+
 
             return response()->json([
                 'message' => 'Multa enlazada a la propiedad',
                 'status' => 200,
-                'multa' => $multa,
-                'propiedad' => $propiedad
             ], 200);
 
         }catch (ModelNotFoundException $e) {
@@ -192,6 +203,27 @@ class multasController extends Controller
                 'error' => $e->getMessage(),
                 'status' => 500
             ], 500);
+        }
+    }
+
+    public function getMultasActivas(){
+        try{
+            $multas = Multa::where('estado_activo',true)->get();
+
+            if($multas->isEmpty()){
+                throw new \Exception("no hay multas activas");
+            }
+
+            return response()->json([
+                'message' => 'Solicitud aceptada .Recibos encontrados',
+                'status' => 200,
+                'multas' => $multas
+            ], 200);
+        }catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => false
+            ], 404);
         }
     }
 }

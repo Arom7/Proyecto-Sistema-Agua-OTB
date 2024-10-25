@@ -87,12 +87,14 @@ Route::middleware('auth:sanctum')->group(function () {
  * Rutas multas protegidas con sanctum
  */
 Route::middleware('auth:sanctum')->group(function () {
-// Ruta para visualizar todas las multas
-Route::get('/multas', [multasController::class, 'index']);
-// Ruta para registrar una multa
-Route::post('/multas', [multasController::class, 'store']);
-// Ruta para actualizar una multa
-Route::put('/multas/{id}', [multasController::class, 'update']);
+    // Ruta para visualizar todas las multas
+    Route::get('/multas', [multasController::class, 'index']);
+    // Ruta para registrar una multa
+    Route::post('/multas', [multasController::class, 'store']);
+    // Ruta para actualizar una multa
+    Route::put('/multas/{id}', [multasController::class, 'update']);
+    // Ruta para la consulta de multas activas
+    Route::get ('/multas/activas', [multasController::class, 'getMultasActivas']);
 });
 
 
@@ -143,3 +145,5 @@ Route::middleware('auth:sanctum')->group(function () {
     // Ruta para consulta de cantidad recibos pendientes global
     Route::get('/cantidad/recibos/pendientes', [reciboController::class, 'cantidadRecibosPendientes']);
 });
+
+Route::patch('/actualizar/propietario/{id}', [propiedadController::class, 'updatePropietario']);
