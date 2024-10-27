@@ -4,7 +4,7 @@
 <div style="text-align: center;">
     <img src="{{ asset('images/logo.png') }}" alt="Logo de la Empresa" style="max-width: 200px;">
     <div style="text-align: center;">
-        <h1>Sistema AquaCube, Reseteo de Contraseña </h1>
+        <h1>Sistema AquaCube </h1>
     </div>
 </div>
 
@@ -15,7 +15,7 @@
 @if ($level === 'error')
 # @lang('Ups, parece que sucedio algo!')
 @else
-# @lang('Hola , este es un correo con el objetivo de cambio de contraseña!')
+# @lang('Hola , este es un correo de parte de Aqua-Cube!')
 @endif
 @endif
 

@@ -123,6 +123,12 @@ class Usuario extends Authenticatable
         return true;
     }
 
+    public static function busquedaCuentaPrincipal($socio_id){
+        return static::where('socio_id_usuario', $socio_id)
+                ->select('email')
+                ->first();
+    }
+
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPasswordNotification($token, $this->email));

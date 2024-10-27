@@ -10,11 +10,14 @@ use App\Models\Medidor;
 use App\Models\Consumo;
 use App\Models\Multa;
 use App\Models\PropiedadMulta;
+use App\Models\Usuario;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\PDF;
+use App\Notifications\EnvioRecibo;
 use Illuminate\Support\Facades\Log;
 
 class reciboController extends Controller
@@ -35,13 +38,13 @@ class reciboController extends Controller
                 return response()->json($data, 404);
             }
 
-            foreach($recibos as $recibo){
+            foreach ($recibos as $recibo) {
                 $id_consumo = $recibo->id_consumo_recibo;
                 $consumo = Consumo::find($id_consumo);
                 $id_propiedad = $consumo->propiedad_id_consumo;
                 $recibo->codigo_propiedad = $id_propiedad;
                 $propiedad = Propiedad::find($id_propiedad);
-                $recibo->multa_propiedad = Multa::multasPorPropiedad($id_propiedad,$consumo->mes_correspondiente);
+                $recibo->multa_propiedad = Multa::multasPorPropiedad($id_propiedad, $consumo->mes_correspondiente);
                 $recibo->mes_correspondiente = $consumo->mes_correspondiente;
                 $id_socio = $propiedad->socio_id;
                 $socio = Socio::find($id_socio);
@@ -80,7 +83,7 @@ class reciboController extends Controller
             $medidor = Medidor::busquedaMedidor($request->codigo_propiedad);
 
             if (!$medidor) {
-                throw new ModelNotFoundException('Medidor o propiedad no registrados');
+                throw new ModelNotFoundException('Medidor no registrado');
             }
 
             $medidor->medida_inicial = $medidor->ultima_medida;
@@ -96,19 +99,34 @@ class reciboController extends Controller
 
             $consumo->save();
 
-            Log::info('Lectura anterior: '. $medidor->medida_inicial);
+            Log::info('Lectura anterior: ' . $medidor->medida_inicial);
 
             $recibo = Recibo::create([
                 'estado_pago' => false,
                 'total' => Recibo::calcularTotal($consumo->consumo_total),
                 'fecha_lectura' => Carbon::now(),
-                'lectura_actual_correspondiente'=> $request->lectura_actual,
+                'lectura_actual_correspondiente' => $request->lectura_actual,
                 'lectura_anterior_correspondiente' => $medidor->medida_inicial,
                 'id_consumo_recibo' => $consumo->id_consumo,
                 'observaciones' => $request->observaciones
             ]);
 
             $recibo->save();
+
+            $propiedad = Propiedad::find($request->codigo_propiedad);
+            $socio = Socio::find($propiedad->socio_id);
+            $usuario = Usuario::busquedaCuentaPrincipal($socio->id);
+
+
+            $data = [
+                'recibo' => $recibo,
+                'consumo' => $consumo,
+                'propiedad' => $propiedad,
+                'socio' => $socio,
+                'multas' => null
+            ];
+
+            $usuario->notify(new EnvioRecibo($data));
 
             DB::commit();
 
@@ -126,13 +144,13 @@ class reciboController extends Controller
                 'errores' => $e->getMessage(),
                 'status' => 422,
             ], 422);
-        }catch (ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             DB::rollBack();
             return response()->json([
                 'message' => $e->getMessage(),
                 'status' => 404,
             ], 404);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error interno del servidor.',
                 'error' => $e->getMessage(),
@@ -146,18 +164,18 @@ class reciboController extends Controller
      */
     public function show(string $id)
     {
-        try{
+        try {
             $recibo = Recibo::find($id);
 
-            if(!$recibo){
+            if (!$recibo) {
                 throw new ModelNotFoundException('Recibo no encontrado');
             }
 
             return response()->json([
                 'preaviso' => $recibo,
                 'status' => 200
-            ],200);
-        }catch (ModelNotFoundException $e) {
+            ], 200);
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'message' => $e->getMessage(),
                 'status' => 404,
@@ -170,14 +188,14 @@ class reciboController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        try{
+        try {
             $recibo = Recibo::find($id);
 
-            if(!$recibo){
+            if (!$recibo) {
                 throw new ModelNotFoundException('Recibo no encontrado');
             }
 
-            if($recibo->estado_pago){
+            if ($recibo->estado_pago) {
                 throw new \Exception("El recibo ya fue pagado, no se puede editar", 400);
             }
 
@@ -189,34 +207,34 @@ class reciboController extends Controller
 
             $consumo = Consumo::buscarConsumo($recibo->id_consumo_recibo);
 
-            if(!$consumo){
+            if (!$consumo) {
                 throw new ModelNotFoundException('Error en la busqueda del consumo de la propiedad');
             }
 
             $consumo->lectura_actual = $request->lectura_actual;
 
             $multa = PropiedadMulta::busquedaMes($consumo->mes_correspondiente, $consumo->propiedad_id_consumo);
-            Log::info('Multas encontradas: '. $multa);
+            Log::info('Multas encontradas: ' . $multa);
             $subtototal_multas = 0;
-            foreach($multa as $multa){
+            foreach ($multa as $multa) {
                 $multa->mes_multa = $request->mes_correspondiente;
                 $multa->save();
                 $infraccion = Multa::find($multa->infracion_id);
-                Log::info('Infraccion encontrada: '. $infraccion ->monto_infraccion);
+                Log::info('Infraccion encontrada: ' . $infraccion->monto_infraccion);
                 $subtototal_multas += $infraccion->monto_infraccion;
             }
 
             $consumo->mes_correspondiente = $request->mes_correspondiente;
 
             $medidor = Medidor::find($consumo->propiedad_id_consumo);
-            if(!$medidor){
+            if (!$medidor) {
                 throw new ModelNotFoundException('Error en la busqueda medidor de la propiedad');
             }
 
             $medidor->ultima_medida = $request->lectura_actual;
             $consumo->consumo_total = $medidor->ultima_medida - $medidor->medida_inicial;
 
-            if($consumo->consumo_total < 0){
+            if ($consumo->consumo_total < 0) {
                 throw new \Exception("El consumo total no puede ser negativo", 400);
             }
 
@@ -235,21 +253,20 @@ class reciboController extends Controller
                 'medidor' => $medidor,
                 'consumo' => $consumo,
                 'status' => 200
-            ],200);
-
-        }catch (ModelNotFoundException $e) {
+            ], 200);
+        } catch (ModelNotFoundException $e) {
             DB::rollBack();
             return response()->json([
                 'message' => $e->getMessage(),
                 'status' => 404,
             ], 404);
-        }catch (ValidationException $e) {
+        } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Datos invalidados.',
                 'errores' => $e->getMessage(),
                 'status' => 422,
             ], 422);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'message' => 'Error interno del servidor.',
@@ -259,7 +276,8 @@ class reciboController extends Controller
         }
     }
 
-    public function update_estado($id) {
+    public function update_estado($id)
+    {
         try {
             $recibo = Recibo::find($id);
 
@@ -287,20 +305,20 @@ class reciboController extends Controller
      */
     public function destroy(string $id)
     {
-        try{
+        try {
             $recibo = Recibo::find($id);
 
-            if(!$recibo){
+            if (!$recibo) {
                 throw new ModelNotFoundException('Socio no encontrado');
             }
 
-            $recibo -> delete();
+            $recibo->delete();
 
             return response()->json([
                 'message' => 'Usuario eliminado',
                 'status' => 200
-            ],200);
-        }catch (ModelNotFoundException $e) {
+            ], 200);
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'message' => $e->getMessage(),
                 'status' => 404,
@@ -308,37 +326,85 @@ class reciboController extends Controller
         }
     }
 
-    public function cantidadRecibosPagados() {
-        try{
+    public function cantidadRecibosPagados()
+    {
+        try {
             $cantidadRecibosPagados = Recibo::where('estado_pago', true)->count();
 
             return response()->json([
                 'status' => true,
                 'cantidadRecibosPagados' => $cantidadRecibosPagados
-            ],200);
-        }catch (\Exception $e){
+            ], 200);
+        } catch (\Exception $e) {
             $data = [
-                'message' => 'Error al obtener los recibos pagados: '.$e->getMessage(),
+                'message' => 'Error al obtener los recibos pagados: ' . $e->getMessage(),
                 'status' => 500
             ];
             return response($data, 500);
         }
     }
 
-    public function cantidadRecibosPendientes() {
-        try{
+    public function cantidadRecibosPendientes()
+    {
+        try {
             $cantidadRecibosPagados = Recibo::where('estado_pago', false)->count();
 
             return response()->json([
                 'status' => true,
                 'cantidadRecibosPendientes' => $cantidadRecibosPagados
-            ],200);
-        }catch (\Exception $e){
+            ], 200);
+        } catch (\Exception $e) {
             $data = [
-                'message' => 'Error al obtener los recibos pagados: '.$e->getMessage(),
+                'message' => 'Error al obtener los recibos pagados: ' . $e->getMessage(),
                 'status' => 500
             ];
             return response($data, 500);
+        }
+    }
+
+    public function generarReciboPDF($id)
+    {
+        try {
+            $recibo = Recibo::find($id);
+
+            if (!$recibo) {
+                throw new ModelNotFoundException('Recibo no encontrado');
+            }
+
+
+            $consumo = Consumo::find($recibo->id_consumo_recibo);
+            $propiedad = Propiedad::find($consumo->propiedad_id_consumo);
+            $socio = Socio::find($propiedad->socio_id);
+            $multas_propiedad = PropiedadMulta::busquedaMes($consumo->mes_correspondiente, $propiedad->id);
+
+            $multas = [];
+
+            if (!$multas_propiedad->isEmpty()) {
+                foreach ($multas_propiedad as $multa_propiedad) {
+                    $multa = Multa::find($multa_propiedad->infracion_id);
+                    if ($multa) {
+                        $multas[] = $multa;
+                    }
+                }
+            }
+
+
+            $data = [
+                'recibo' => $recibo,
+                'consumo' => $consumo,
+                'propiedad' => $propiedad,
+                'socio' => $socio,
+                'multas' => $multas
+            ];
+
+            $pdf = PDF::loadView('email.pdf_recibo', ['datos' => $data])->setPaper('a5', 'landscape');
+
+            return $pdf->download('recibo.pdf');
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 404,
+            ], 404);
         }
     }
 }

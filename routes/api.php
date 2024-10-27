@@ -147,3 +147,5 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::patch('/actualizar/propietario/{id}', [propiedadController::class, 'updatePropietario']);
+
+Route::get('/generar/recibo/pdf/{id}' , [reciboController::class, 'generarReciboPDF']);
