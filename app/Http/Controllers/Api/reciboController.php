@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\PDF;
 use App\Notifications\EnvioRecibo;
+use App\Notifications\EnvioPago;
 use Illuminate\Support\Facades\Log;
 
 class reciboController extends Controller
@@ -278,6 +279,7 @@ class reciboController extends Controller
 
     public function update_estado($id)
     {
+        DB::beginTransaction();
         try {
             $recibo = Recibo::find($id);
 
@@ -288,15 +290,39 @@ class reciboController extends Controller
             $recibo->estado_pago = true;
             $recibo->save();
 
+            $consumo = Consumo::find($recibo->id_consumo_recibo);
+            $propiedad = Propiedad::find($consumo->propiedad_id_consumo);
+            $socio = Socio::find($propiedad->socio_id);
+            $usuario = Usuario::busquedaCuentaPrincipal($socio->id);
+            if (!$usuario) {
+                throw new ModelNotFoundException('Usuario no encontrado');
+            }
+
+            $datos = [
+                'recibo' => $recibo,
+                'consumo' => $consumo,
+                'fecha_pago' => Carbon::now()
+            ];
+
+            $usuario->notify(new EnvioPago($datos));
+            DB::commit();
             return response()->json([
                 'message' => 'Recibo actualizado, estado de pago.',
                 'status' => 200
             ], 200);
         } catch (ModelNotFoundException $e) {
+            DB::rollBack();
             return response()->json([
                 'message' => $e->getMessage(),
                 'status' => 404,
             ], 404);
+        }catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Error interno del servidor.',
+                'error' => $e->getMessage(),
+                'status' => 500
+            ], 500);
         }
     }
 
@@ -405,6 +431,35 @@ class reciboController extends Controller
                 'message' => $e->getMessage(),
                 'status' => 404,
             ], 404);
+        }
+    }
+
+    public function enviarPagoEmail(){
+
+    }
+
+    public function generarPagoPDF(){
+        try {
+            $id = 9;
+            $recibos = Recibo::find($id);
+            $consumo = Consumo::find($recibos->id_consumo_recibo);
+            $fecha_pago = Carbon::now();
+
+            $datos = [
+                'recibo' => $recibos,
+                'consumo' => $consumo,
+                'fecha_pago' => $fecha_pago
+            ];
+
+            $pdf = PDF::loadView('email.pdf_pago', ['datos' => $datos])->setPaper('a5', 'landscape');
+
+            return $pdf->download('recibo-pago.pdf');
+        } catch (\Exception $e) {
+            $data = [
+                'message' => 'Error al obtener los recibos: ' . $e->getMessage(),
+                'status' => 500
+            ];
+            return response()->json($data, 500);
         }
     }
 }

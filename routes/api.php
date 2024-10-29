@@ -121,7 +121,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Ruta para enlazar una multa a un propietario
     Route::post('/propietario/multa', [multasController::class, 'enlazarMulta']);
     // Ruta para visualizar las recibos de un propietario
-    Route::get('/socio/deudas/pagos/{fecha_inicio}/{fecha_fin}/{id}', [socioController::class, 'socio_recibo']);
+    Route::get('/socio/deudas/pagos/{fecha_inicio}/{fecha_fin}/{id}/{generaPDF}', [socioController::class, 'socio_recibo']);
     // Ruta para la busqueda de un medidor por su numero de medidor
     Route::get('/busqueda-medidor/propiedades/{id}', [medidorController::class, 'show']);
 });
@@ -149,3 +149,10 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::patch('/actualizar/propietario/{id}', [propiedadController::class, 'updatePropietario']);
 
 Route::get('/generar/recibo/pdf/{id}' , [reciboController::class, 'generarReciboPDF']);
+
+Route::get('/generar/email/pago/pdf' , [reciboController::class, 'enviarPagoEmail']);
+
+
+Route::get('/generar/pago/pdf' , [reciboController::class, 'generarPagoPDF']);
+
+Route::get('/generar/reporte/mantenimiento/PDF' , [MantenimientoController::class, 'generarReporteMantenimientoPDF']);

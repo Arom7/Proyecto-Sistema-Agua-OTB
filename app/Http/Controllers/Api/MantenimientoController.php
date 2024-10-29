@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use App\Models\Mantenimiento;
+use Barryvdh\DomPDF\Facade\PDF;
 use App\Models\Socio;
+use Illuminate\Support\Facades\Log;
 
 class MantenimientoController extends Controller
 {
@@ -144,5 +146,13 @@ class MantenimientoController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function generarReporteMantenimientoPDF(){
+        $mantenimientos = Mantenimiento::all();
+        Log::info('Generando reporte de mantenimientos en PDF'. $mantenimientos);
+        $pdf = PDF::loadView('email.pdf_mantenimiento', ['mantenimientos' => $mantenimientos]);
+        $pdfOutput = $pdf->output();
+        return response($pdfOutput)->header('Content-Type', 'application/pdf');
     }
 }

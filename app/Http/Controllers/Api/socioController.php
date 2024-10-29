@@ -8,6 +8,7 @@ use App\Models\Usuario;
 use App\Models\Recibo;
 use Illuminate\Http\Request;
 use App\Models\Socio;
+use Barryvdh\DomPDF\Facade\PDF;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -260,7 +261,7 @@ class socioController extends Controller
         }
     }
 
-    public function socio_recibo($fecha_inicio , $fecha_fin, $pagoDeuda){
+    public function socio_recibo($fecha_inicio , $fecha_fin, $pagoDeuda,$generaPDF){
         try{
             $sociosRecibos = Socio::with('propiedades')->get();
 
@@ -298,6 +299,19 @@ class socioController extends Controller
                     'status' => 400,
                 ],404);
             }else{
+                Log::info('valor de generapdf: ' . $generaPDF);
+
+                $datosTitle = [
+                    'fecha_inicio' => $fecha_inicio,
+                    'fecha_fin' => $fecha_fin,
+                    'tipo_reporte'=> $pagoDeuda
+                ];
+
+
+                if($generaPDF == 1){
+                    $pdf = PDF::loadView('email.pdf_reporte', ['socios' => $sociosRecibos, 'datosTitle' => $datosTitle]);
+                    return $pdf->download('reporte.pdf');
+                }
                 return response()->json([
                     'message' => 'Socios con sus respectivos recibos encontrados',
                     'status' => 200,

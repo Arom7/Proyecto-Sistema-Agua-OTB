@@ -139,7 +139,7 @@
                 </table>
             </div>
             <div class="amounts">
-                <table style="margin-left:15%">
+                <table style="margin-left:2%">
                     <tr>
                         <td style="font-size: 15px; margin-rigth: 10px;">
                             Socio :
