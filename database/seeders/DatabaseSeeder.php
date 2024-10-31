@@ -26,13 +26,9 @@ class DatabaseSeeder extends Seeder
             UsuarioSeeder::class,
             // Tabla intermedia Rol >--< Usuario
             PropiedadSeeder::class,
-            MultaSeeder::class,
             //tabla intermedia Propiedad >--< Multa
-            PropiedadMultaSeeder::class,
-            MedidorSeeder::class,
-            ConsumoSeeder::class,
-            ReciboSeeder::class,
-            MantenimientoSeeder::class
+            RoleSeeder::class,
+            RoleUsuarioSeeder::class,
         ]);
     }
 }

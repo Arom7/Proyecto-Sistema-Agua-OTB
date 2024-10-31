@@ -22,6 +22,6 @@ class SocioSeeder extends Seeder
             'otb_id' => 1,
         ]);
 
-        Socio::factory()->count(10)->create();
+        Socio::factory()->count(19)->create();
     }
 }

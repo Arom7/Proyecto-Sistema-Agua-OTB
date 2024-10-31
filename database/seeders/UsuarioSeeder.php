@@ -20,6 +20,6 @@ class UsuarioSeeder extends Seeder
             'socio_id_usuario' => 1,
         ]);
 
-        Usuario::factory()->count(12)->create();
+        Usuario::factory()->count(14)->create();
     }
 }

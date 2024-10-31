@@ -145,7 +145,25 @@ class MantenimientoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $mantenimiento = Mantenimiento::findOrFail($id);
+            $mantenimiento->delete();
+
+            return response()->json([
+                'message' => 'Mantenimiento eliminado correctamente.',
+                'status' => true,
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Mantenimiento no encontrado.',
+                'status' => false,
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al eliminar el mantenimiento.',
+                'status' => false,
+            ], 500);
+        }
     }
 
     public function generarReporteMantenimientoPDF(){
