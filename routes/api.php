@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\socioController;
 use App\Http\Controllers\Api\MantenimientoController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ConsumoController;
+use App\Http\Controllers\Api\V1\SociosController;
 use App\Models\Consumo;
 use Illuminate\Support\Facades\Auth;
 
@@ -156,3 +157,7 @@ Route::get('/generar/email/pago/pdf' , [reciboController::class, 'enviarPagoEmai
 Route::get('/generar/pago/pdf' , [reciboController::class, 'generarPagoPDF']);
 
 Route::get('/generar/reporte/mantenimiento/PDF' , [MantenimientoController::class, 'generarReporteMantenimientoPDF']);
+
+
+
+Route::get('/lista/socios' , [SociosController::class, 'index']);
