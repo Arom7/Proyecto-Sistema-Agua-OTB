@@ -22,6 +22,7 @@ class Socio extends Model
         'primer_apellido_socio',
         'segundo_apellido_socio',
         'ci_socio',
+        'image',
         'otb_id'
     ];
 

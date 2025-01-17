@@ -1,20 +1,20 @@
 <?php
 
-use App\Http\Controllers\Api\cuentaController;
+/* use App\Http\Controllers\Api\cuentaController;
 use App\Http\Controllers\Api\medidorController;
 use App\Http\Controllers\Api\multasController;
 use App\Http\Controllers\Api\propiedadController;
 use App\Http\Controllers\Api\reciboController;
 use App\Http\Controllers\Api\Auth\ForgotPasswordController;
-use App\Http\Controllers\Api\Auth\ResetPasswordController;
+use App\Http\Controllers\Api\Auth\ResetPasswordController; */
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\socioController;
+/* use App\Http\Controllers\Api\socioController;
 use App\Http\Controllers\Api\MantenimientoController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\ConsumoController;
+use App\Http\Controllers\Api\ConsumoController; */
 use App\Http\Controllers\Api\V1\SociosController;
-use App\Models\Consumo;
-use Illuminate\Support\Facades\Auth;
+/* use App\Models\Consumo;
+use Illuminate\Support\Facades\Auth; */
 
 /*
 |--------------------------------------------------------------------------
@@ -31,14 +31,14 @@ use Illuminate\Support\Facades\Auth;
 
 // Registro usuarios, considerar que estos dos metodos ya no funcionan como tal, sustiutidos por login y register
 
-Route::post('/login/socio', [AuthController::class, 'login']);
+/* Route::post('/login/socio', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
 Route::post('/reseteo/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::post('/reseteo', [ResetPasswordController::class, 'reset'])->name('password.reset');
 /*
     * Rutas protegidas por sanctum para los socios y sus respectivos controles
 */
-Route::middleware('auth:sanctum')->group(function () {
+/* Route::middleware('auth:sanctum')->group(function () {
     // Devuelve solo una lista de los socios.
     Route::get('/socios', [socioController::class, 'index']);
     // Devuelve un solo usuario con su id
@@ -53,7 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/socios/{id}', [socioController::class, 'destroy']);
     // Ruta para registrar un nuevo socio
     Route::post('/registro/socio', [AuthController::class, 'register']);
-});
+}); */
 
 /* Se debe considerar este caso, tokens con capacidades*/
 //Route::middleware(['auth:sanctum', 'can:ver recibos'])
@@ -61,7 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
 /*
     * Rutas acceso recibos protegidas con sanctum
 */
-Route::middleware(['auth:sanctum', 'role:administrador|lecturador'])->group(function () {
+/* Route::middleware(['auth:sanctum', 'role:administrador|lecturador'])->group(function () {
     //Ruta para la visualizacion de recibos de una persona, modificar luego
     Route::get('/recibos', [reciboController::class, 'index']);
     //Ruta para generar un nuevo recibo
@@ -70,24 +70,24 @@ Route::middleware(['auth:sanctum', 'role:administrador|lecturador'])->group(func
     Route::get('/recibos/{id}', [reciboController::class, 'show']);
     //Ruta para actualizar un recibo
     Route::put('/actualizar-recibo/{id}', [reciboController::class, 'update']);
-});
+}); */
 
 /*
     * Rutas de acceso a las propiedades
 */
-Route::middleware('auth:sanctum')->group(function () {
+/* Route::middleware('auth:sanctum')->group(function () {
     // Ruta para registrar propiedades a un usuario
     Route::post('/registro-propiedades', [propiedadController::class, 'store']);
     //Ruta para visualizar todas las propiedades de un socio en especifico
     Route::get('/propiedades/socio/{id}', [propiedadController::class, 'show']);
     // Ruta para visualizar las propiedades de un socio
     Route::get('/propiedades/socios', [socioController::class, 'propiedades']);
-});
+}); */
 
 /**
  * Rutas multas protegidas con sanctum
  */
-Route::middleware('auth:sanctum')->group(function () {
+/* Route::middleware('auth:sanctum')->group(function () {
     // Ruta para visualizar todas las multas
     Route::get('/multas', [multasController::class, 'index']);
     // Ruta para registrar una multa
@@ -97,12 +97,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Ruta para la consulta de multas activas
     Route::get ('/multas/activas', [multasController::class, 'getMultasActivas']);
 });
-
+ */
 
 /**
  * Rutas de acceso a los mantenimientos
  */
-Route::middleware('auth:sanctum')->group(function () {
+/* Route::middleware('auth:sanctum')->group(function () {
     // Ruta para visualizar todos los mantenimientos
     Route::get('/lista/mantenimientos', [MantenimientoController::class, 'index']);
     // Ruta para registrar un mantenimiento
@@ -113,12 +113,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/mantenimientos/{id}', [MantenimientoController::class, 'update']);
     // Ruta para eliminar un mantenimiento
     Route::delete('/mantenimientos/{id}', [MantenimientoController::class, 'destroy']);
-});
+}); */
 
 /**
  * Otras rutas protegidas por sanctum
  */
-Route::middleware('auth:sanctum')->group(function () {
+/* Route::middleware('auth:sanctum')->group(function () {
     // Ruta para enlazar una multa a un propietario
     Route::post('/propietario/multa', [multasController::class, 'enlazarMulta']);
     // Ruta para visualizar las recibos de un propietario
@@ -131,12 +131,12 @@ Route::get('/endeudados/recibos/{id}', [ConsumoController::class, 'endeudados'])
 
 Route::patch('/recibo/estado/pago/{id}', [reciboController::class, 'update_estado']);
 
-Route::get('/recibo/{id}', [reciboController::class, 'show']);
+Route::get('/recibo/{id}', [reciboController::class, 'show']); */
 
 /**
  * Otras rutas protegidas por sanctum
  */
-Route::middleware('auth:sanctum')->group(function () {
+/* Route::middleware('auth:sanctum')->group(function () {
     // Ruta para consulta de cantidad socios
     Route::get('/cantidad/socios', [socioController::class, 'cantidadSocios']);
     // Ruta para consulta de cantidad propiedades
@@ -157,7 +157,17 @@ Route::get('/generar/email/pago/pdf' , [reciboController::class, 'enviarPagoEmai
 Route::get('/generar/pago/pdf' , [reciboController::class, 'generarPagoPDF']);
 
 Route::get('/generar/reporte/mantenimiento/PDF' , [MantenimientoController::class, 'generarReporteMantenimientoPDF']);
-
+ */
 
 
 Route::get('/lista/socios' , [SociosController::class, 'index']);
+
+Route::prefix('v1')->group(function () {
+    Route::get('/socios', [SociosController::class, 'index']);
+    Route::get('/socios/{id}', [SociosController::class, 'show']);
+    //Route::post('/socios', [SociosController::class, 'store']);
+    Route::put('/socios/{id}', [SociosController::class, 'update']);
+    Route::delete('/socios/{id}', [SociosController::class, 'destroy']);
+});
+
+Route::post('/registro/socios', [SociosController::class, 'store']);

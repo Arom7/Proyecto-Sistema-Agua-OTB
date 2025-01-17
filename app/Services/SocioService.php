@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Http\Resources\SocioCollection;
+use App\Http\Resources\SocioResource;
 use App\Repositories\Interfaces\SocioRepositoryInterface;
 
 class SocioService{
@@ -19,9 +21,25 @@ class SocioService{
                 'message' => 'No se encontraron socios.'
             ], 404);
         }
+        return new SocioCollection($lista_socios);
+    }
+
+    public function getSocio($id){
+        $socio = $this->socioRepository->find($id);
+        if(!$socio){
+            return response()->json([
+                'message' => 'Socio no encontrado.'
+            ], 404);
+        }
+        return new SocioResource($socio);
+    }
+
+    public function createSocio(array $data, $image = null){
+        if(isset($image)){
+            $data['image'] = $image->store('socios', 'public');
+        }
         return response()->json([
-            'data' => $lista_socios,
-            'message' => 'Lista de socios recuperada con exito.'
-        ], 200);
+            'message' => $this->socioRepository->create($data) ,
+        ], 201);
     }
 }

@@ -21,7 +21,19 @@ class SocioRepository implements SocioRepositoryInterface {
     // Registro de un nuevo socio
     public function create(array $data)
     {
-        return Socio::create($data);
+        $socio = Socio::create([
+            'nombre_socio' => $data['nombre'],
+            'primer_apellido_socio' => $data['primer_apellido'],
+            'segundo_apellido_socio' => $data['segundo_apellido'],
+            'ci_socio' => $data['ci'],
+            'image' => $data['image'],
+            'otb_id' => 1
+        ]);
+
+        if($socio){
+            return 'Registro del socio exitoso';
+        }
+        return 'Error al crear el socio.';
     }
 
     public function update(array $data, string $id) {
