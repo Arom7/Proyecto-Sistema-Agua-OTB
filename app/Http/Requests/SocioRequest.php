@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class SocioRequest extends FormRequest
 {
@@ -26,6 +28,7 @@ class SocioRequest extends FormRequest
             'primer_apellido' => ['required', 'string', 'regex:/^(?! )[a-zA-Z]+( [a-zA-Z]+)*$/', 'max:85'],
             'segundo_apellido' => ['string','regex:/^(?! )[a-zA-Z]+( [a-zA-Z]+)*$/', 'max:85'],
             'ci' => ['required', 'string', 'regex:/^[a-zA-Z0-9]+$/', 'max:40','unique:socios,ci_socio'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:usuarios,email'],
             'image' => ['nullable' , 'image' , 'mimes:jpeg,png,jpg,gif,svg' , 'max:2048']
         ];
     }
@@ -43,8 +46,20 @@ class SocioRequest extends FormRequest
             'ci_socio.regex' => 'El CI solo puede contener letras y números.',
             'ci.required' => 'La cedula de identidad es requerida',
             'ci.string' => 'La cedula de identidad debe ser un texto',
+            'ci.unique' => 'La cedula de identidad ya se encuentra registrada',
+            'email.required' => 'El email es requerido',
+            'email.email' => 'El email debe ser un correo electrónico válido',
             'image.required' => 'La imagen es requerida',
             'image.mines' => 'La imagen debe ser un archivo de tipo: jpeg, png, jpg, gif, svg',
         ];
     }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json([
+            'message' => 'Error de validación',
+            'errors' => $validator->errors()
+        ], 422));
+    }
+
 }

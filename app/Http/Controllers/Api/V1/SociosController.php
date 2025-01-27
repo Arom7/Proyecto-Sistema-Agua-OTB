@@ -64,11 +64,46 @@ class SociosController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(SocioRequest $request, string $id)
     {
-        return response()->json([
-            'message' => 'Socio actualizado correctamente.'
-        ], 200);
+        try{
+            $validatedData = $request->validated();
+            $socio_updated = $this->socioService->updateSocio($validatedData, $id, $request->file('image'));
+            
+            if(!$socio_updated){
+                throw new \Exception('Socio no encontrado.');
+            }else {
+                return response()->json([
+                    'message' => 'Socio actualizado correctamente.'
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al actualizar el socio.',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function update_partial(SocioRequest $request, string $id)
+    {
+        try{
+            $socio = Socio::find($id);
+            if(!$socio){
+                return response()->json([
+                    'message' => 'Socio no encontrado.'
+                ], 404);
+            }
+            $socio->update($request->all());
+            return response()->json([
+                'message' => 'Socio actualizado correctamente.'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al actualizar el socio.'
+            ], 500);
+        }
+
     }
 
     /**
@@ -76,8 +111,12 @@ class SociosController extends Controller
      */
     public function destroy(string $id)
     {
-        response()->json([
-            'message' => 'Socio eliminado correctamente'
-        ], 404);
+        try{
+            return $this->socioService->deleteSocio($id);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al eliminar el socio.'
+            ], 500);
+        }
     }
 }

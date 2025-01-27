@@ -29,7 +29,6 @@ class Usuario extends Authenticatable
         'email',
         'contrasenia',
         'socio_id_usuario',
-
     ];
 
     /**
@@ -66,11 +65,7 @@ class Usuario extends Authenticatable
         return $this->belongsTo(Socio::class,'socio_id_usuario','id');
     }
 
-    public static function cuentaExistente($username)
-    {
-        return static::where('username', $username)
-                     ->exists();
-    }
+
 
     public static function generarUsername ($data){
         $username = strtolower(substr($data->nombre_socio,0,2).substr($data->primer_apellido_socio,0,2).substr($data->segundo_apellido_socio,0,2).rand(1000,9999));

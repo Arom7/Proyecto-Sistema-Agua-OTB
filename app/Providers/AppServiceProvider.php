@@ -3,8 +3,12 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+// Repositories para el socio
 use App\Repositories\Eloquent\SocioRepository;
 use App\Repositories\Interfaces\SocioRepositoryInterface;
+//Repositories para el usuario
+use App\Repositories\Eloquent\UserRepository;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             SocioRepositoryInterface::class,
             SocioRepository::class
+        );
+        $this->app->bind(
+            UserRepositoryInterface::class,
+            UserRepository::class
         );
     }
 

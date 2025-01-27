@@ -1,20 +1,20 @@
 <?php
 
-/* use App\Http\Controllers\Api\cuentaController;
+use App\Http\Controllers\Api\cuentaController;
 use App\Http\Controllers\Api\medidorController;
 use App\Http\Controllers\Api\multasController;
 use App\Http\Controllers\Api\propiedadController;
 use App\Http\Controllers\Api\reciboController;
 use App\Http\Controllers\Api\Auth\ForgotPasswordController;
-use App\Http\Controllers\Api\Auth\ResetPasswordController; */
+use App\Http\Controllers\Api\Auth\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
-/* use App\Http\Controllers\Api\socioController;
+use App\Http\Controllers\Api\socioController;
 use App\Http\Controllers\Api\MantenimientoController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\ConsumoController; */
+use App\Http\Controllers\Api\ConsumoController;
 use App\Http\Controllers\Api\V1\SociosController;
-/* use App\Models\Consumo;
-use Illuminate\Support\Facades\Auth; */
+use App\Models\Consumo;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,14 +31,14 @@ use Illuminate\Support\Facades\Auth; */
 
 // Registro usuarios, considerar que estos dos metodos ya no funcionan como tal, sustiutidos por login y register
 
-/* Route::post('/login/socio', [AuthController::class, 'login']);
+Route::post('/login/socio', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
 Route::post('/reseteo/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::post('/reseteo', [ResetPasswordController::class, 'reset'])->name('password.reset');
-/*
-    * Rutas protegidas por sanctum para los socios y sus respectivos controles
-*/
-/* Route::middleware('auth:sanctum')->group(function () {
+
+// Rutas protegidas por sanctum para los socios y sus respectivos controles
+
+ Route::middleware('auth:sanctum')->group(function () {
     // Devuelve solo una lista de los socios.
     Route::get('/socios', [socioController::class, 'index']);
     // Devuelve un solo usuario con su id
@@ -53,7 +53,7 @@ Route::post('/reseteo', [ResetPasswordController::class, 'reset'])->name('passwo
     Route::delete('/socios/{id}', [socioController::class, 'destroy']);
     // Ruta para registrar un nuevo socio
     Route::post('/registro/socio', [AuthController::class, 'register']);
-}); */
+});
 
 /* Se debe considerar este caso, tokens con capacidades*/
 //Route::middleware(['auth:sanctum', 'can:ver recibos'])
@@ -165,9 +165,9 @@ Route::get('/lista/socios' , [SociosController::class, 'index']);
 Route::prefix('v1')->group(function () {
     Route::get('/socios', [SociosController::class, 'index']);
     Route::get('/socios/{id}', [SociosController::class, 'show']);
-    //Route::post('/socios', [SociosController::class, 'store']);
+    Route::post('/socios', [SociosController::class, 'store']);
     Route::put('/socios/{id}', [SociosController::class, 'update']);
+    Route::patch('/socios/{id}', [SociosController::class, 'update_partial']);
     Route::delete('/socios/{id}', [SociosController::class, 'destroy']);
 });
 
-Route::post('/registro/socios', [SociosController::class, 'store']);
