@@ -58,15 +58,9 @@ class SocioService{
 
             $usuario = $this->userRepository->create($data_user);
             if($usuario){
-                return response()->json([
-                    'username' => $usuario['username'],
-                    'password' => $usuario['password'],
-                    'message' => 'Socio y cuenta creados correctamente.'
-                ], 200);
+                return $usuario;
             }else{
-                return response()->json([
-                    'message' => 'Error al crear la cuenta del socio.'
-                ], 500);
+                return null;
             }
         }
         return response()->json([

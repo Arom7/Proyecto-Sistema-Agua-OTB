@@ -36,6 +36,7 @@ class UserRepository implements UserRepositoryInterface{
         $user = [
             'username' => $username,
             'password' => $password,
+            'email' => $data['email'],
         ];
         if($cuenta){
             DB::commit();

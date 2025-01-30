@@ -171,3 +171,4 @@ Route::prefix('v1')->group(function () {
     Route::delete('/socios/{id}', [SociosController::class, 'destroy']);
 });
 
+Route::get('/descargar-pdf', [reciboController::class, 'generarPDF']);

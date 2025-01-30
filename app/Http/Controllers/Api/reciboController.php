@@ -462,4 +462,17 @@ class reciboController extends Controller
             return response()->json($data, 500);
         }
     }
+
+
+    public function generarPDF()
+    {
+        $data = [
+            'nombre' => 'Alan Giovanni',
+            'usuario' => '1355063',
+            'contrasenia' => 'AlanGiovanni26',
+        ];
+        $pdf = Pdf::loadView('email.pdf_cuenta', ['data' => $data]);
+        return $pdf->stream('Cuenta_Usuario.pdf'); // Muestra en el navegador
+        // return $pdf->download('Cuenta_Usuario.pdf'); // Para descargar
+    }
 }

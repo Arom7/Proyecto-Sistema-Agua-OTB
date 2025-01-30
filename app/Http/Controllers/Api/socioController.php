@@ -342,4 +342,17 @@ class socioController extends Controller
             return response($data, 500);
         }
     }
+
+    public function generarPDF()
+    {
+        $data = [
+            'nombre' => 'Alan Giovanni',
+            'usuario' => '1355063',
+            'contrasenia' => 'AlanGiovanni26',
+        ];
+
+        $pdf = Pdf::loadView('pdf.usuario', $data);
+        return $pdf->stream('Cuenta_Usuario.pdf'); // Muestra en el navegador
+        // return $pdf->download('Cuenta_Usuario.pdf'); // Para descargar
+    }
 }

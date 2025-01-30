@@ -6,16 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\SocioRequest;
 use App\Models\Socio;
 use App\Services\SocioService;
+use App\Services\UserService;
+use App\Notifications\EnvioCuenta;
 use Illuminate\Http\Request;
 
 class SociosController extends Controller
 {
 
     protected $socioService;
+    protected $userService;
 
-    public function __construct(SocioService $socioService)
+    public function __construct(SocioService $socioService, UserService $userService)
     {
         $this->socioService = $socioService;
+        $this->userService = $userService;
     }
 
     /**
@@ -39,10 +43,26 @@ class SociosController extends Controller
     {
         $validatedData = $request->validated();
         try{
-            return $this->socioService->createSocio($validatedData, $request->file('image'));
+            $usuario = $this->socioService->createSocio($validatedData, $request->file('image'));
+            if(!$usuario){
+                throw new \Exception('Error al crear el usuario.');
+            }
+
+            $data = [
+                'username' => $usuario['username'],
+                'password' => $usuario['password']
+            ];
+            $user = $this->userService->find($usuario['username']);
+            $user->notify(new EnvioCuenta($data));
+
+            return response()->json([
+                'message' => 'Socio creado correctamente.',
+                'user' => $usuario['username'],
+                'password'=> $usuario['password']
+            ], 201);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Error al crear el socio.'
+                'message' => $e->getMessage()
             ], 500);
         }
     }
@@ -69,7 +89,7 @@ class SociosController extends Controller
         try{
             $validatedData = $request->validated();
             $socio_updated = $this->socioService->updateSocio($validatedData, $id, $request->file('image'));
-            
+
             if(!$socio_updated){
                 throw new \Exception('Socio no encontrado.');
             }else {
