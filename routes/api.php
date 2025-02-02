@@ -3,7 +3,7 @@
 use App\Http\Controllers\Api\cuentaController;
 use App\Http\Controllers\Api\medidorController;
 use App\Http\Controllers\Api\multasController;
-use App\Http\Controllers\Api\propiedadController;
+
 use App\Http\Controllers\Api\reciboController;
 use App\Http\Controllers\Api\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\Auth\ResetPasswordController;
@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\MantenimientoController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ConsumoController;
 use App\Http\Controllers\Api\V1\SociosController;
+use App\Http\Controllers\Api\V1\PropiedadController;
 use App\Models\Consumo;
 use Illuminate\Support\Facades\Auth;
 
@@ -163,12 +164,25 @@ Route::get('/generar/reporte/mantenimiento/PDF' , [MantenimientoController::clas
 Route::get('/lista/socios' , [SociosController::class, 'index']);
 
 Route::prefix('v1')->group(function () {
-    Route::get('/socios', [SociosController::class, 'index']);
-    Route::get('/socios/{id}', [SociosController::class, 'show']);
-    Route::post('/socios', [SociosController::class, 'store']);
-    Route::put('/socios/{id}', [SociosController::class, 'update']);
-    Route::patch('/socios/{id}', [SociosController::class, 'update_partial']);
-    Route::delete('/socios/{id}', [SociosController::class, 'destroy']);
+    Route::prefix('socios')->group(function () {
+        Route::get('', [SociosController::class, 'index']);
+        Route::get('/{id}', [SociosController::class, 'show']);
+        Route::post('', [SociosController::class, 'store']);
+        Route::put('/{id}', [SociosController::class, 'update']);
+        Route::patch('/{id}', [SociosController::class, 'update_partial']);
+        Route::delete('/{id}', [SociosController::class, 'destroy']);
+    });
+
+    Route::prefix('propiedades')->group(function () {
+        Route::get('', [PropiedadController::class, 'index']);
+        Route::get('/{id}', [PropiedadController::class, 'show']);
+        Route::post('/', [PropiedadController::class, 'store']);
+        Route::put('/{id}', [PropiedadController::class, 'update']);
+        Route::patch('/{id}', [PropiedadController::class, 'update_partial']);
+        Route::delete('/{id}', [PropiedadController::class, 'destroy']);
+    });
 });
+
+
 
 Route::get('/descargar-pdf', [reciboController::class, 'generarPDF']);

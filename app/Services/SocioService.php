@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Http\Resources\SocioCollection;
 use App\Http\Resources\SocioResource;
-use App\Models\Usuario;
 use App\Repositories\Interfaces\SocioRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 

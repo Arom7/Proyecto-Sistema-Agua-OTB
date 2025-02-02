@@ -47,12 +47,14 @@ class SociosController extends Controller
             if(!$usuario){
                 throw new \Exception('Error al crear el usuario.');
             }
-
             $data = [
                 'username' => $usuario['username'],
                 'password' => $usuario['password']
             ];
             $user = $this->userService->find($usuario['username']);
+            if(!$user){
+                throw new \Exception('Error al generar un usuario.');
+            }
             $user->notify(new EnvioCuenta($data));
 
             return response()->json([
